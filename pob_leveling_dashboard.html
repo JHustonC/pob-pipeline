@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoB Leveling Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --fg: #e6edf3;
+            --fg-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79b8ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --border: #30363d;
+            --card-bg: #161b22;
+            --gem-str: #f85149;
+            --gem-dex: #3fb950;
+            --gem-int: #58a6ff;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-tracking { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .status-stopped { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .status-milestone { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+        
+        .btn-primary:hover { background: var(--accent-hover); }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover { background: var(--border); }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Main Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card h2 svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent);
+        }
+        
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Stat Rows */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat-row:last-child { border-bottom: none; }
+        
+        .stat-label { color: var(--fg-muted); font-size: 14px; }
+        .stat-value { font-weight: 600; font-size: 14px; }
+        .stat-value.positive { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.danger { color: var(--danger); }
+        
+        /* Zone Card */
+        .zone-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .zone-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .zone-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: var(--fg-muted);
+        }
+        
+        .zone-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .lab-trial-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(163, 113, 247, 0.2);
+            border: 1px solid #a371f7;
+            border-radius: 8px;
+            color: #a371f7;
+            font-weight: 600;
+        }
+        
+        .lab-trial-badge.hidden { display: none; }
+        
+        /* Gem Cards */
+        .gem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .gem-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        
+        .gem-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .gem-card.current {
+            border-color: var(--success);
+            box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.3);
+        }
+        
+        .gem-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .gem-icon.str { border: 2px solid var(--gem-str); color: var(--gem-str); }
+        .gem-icon.dex { border: 2px solid var(--gem-dex); color: var(--gem-dex); }
+        .gem-icon.int { border: 2px solid var(--gem-int); color: var(--gem-int); }
+        
+        .gem-info { flex: 1; }
+        .gem-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .gem-meta { display: flex; gap: 16px; font-size: 12px; color: var(--fg-muted); }
+        .gem-meta span { display: flex; align-items: center; gap: 4px; }
+        
+        .gem-quest-info {
+            font-size: 12px;
+            color: var(--warning);
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(210, 153, 34, 0.1);
+            border-radius: 6px;
+        }
+        
+        /* Passive Tree */
+        .passive-tree-card {
+            min-height: 300px;
+        }
+        
+        .passive-node {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        
+        .passive-node.current {
+            border-color: var(--success);
+            box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.3);
+        }
+        
+        .passive-node-type {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .passive-node-type.normal { background: var(--bg); border: 2px solid var(--border); }
+        .passive-node-type.notable { background: rgba(210, 153, 34, 0.2); border: 2px solid var(--warning); color: var(--warning); }
+        .passive-node-type.keystone { background: rgba(163, 113, 247, 0.2); border: 2px solid #a371f7; color: #a371f7; }
+        .passive-node-type.mastery { background: rgba(88, 166, 255, 0.2); border: 2px solid var(--accent); color: var(--accent); }
+        
+        .passive-node-info { flex: 1; }
+        .passive-node-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .passive-node-stats { font-size: 12px; color: var(--fg-muted); }
+        
+        /* Milestone */
+        .milestone-card {
+            border-color: #a371f7;
+            background: rgba(163, 113, 247, 0.05);
+        }
+        
+        .milestone-card.hidden { display: none; }
+        
+        .milestone-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .milestone-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a371f7, var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .milestone-title { font-size: 18px; font-weight: 600; }
+        .milestone-subtitle { font-size: 13px; color: var(--fg-muted); }
+        
+        .milestone-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Quest List */
+        .quest-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .quest-item.completed {
+            opacity: 0.7;
+        }
+        
+        .quest-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--bg);
+            flex-shrink: 0;
+        }
+        
+        .quest-icon.pending {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+        }
+        
+        /* Log Feed */
+        .log-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .log-entry {
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--border);
+        }
+        
+        .log-entry.zone { border-left-color: var(--accent); }
+        .log-entry.level { border-left-color: var(--success); }
+        .log-entry.quest { border-left-color: var(--warning); }
+        .log-entry.milestone { border-left-color: #a371f7; }
+        
+        .log-time { color: var(--fg-muted); margin-right: 12px; }
+        .log-type { font-weight: 600; text-transform: uppercase; font-size: 10px; margin-right: 8px; }
+        .log-type.zone { color: var(--accent); }
+        .log-type.level { color: var(--success); }
+        .log-type.quest { color: var(--warning); }
+        .log-type.milestone { color: #a371f7; }
+        
+        /* Settings Panel */
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 400px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+            z-index: 1000;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .settings-panel.open { display: block; }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .setting-group { margin-bottom: 24px; }
+        .setting-group label { display: block; font-size: 13px; color: var(--fg-muted); margin-bottom: 8px; }
+        .setting-group input, .setting-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            font-size: 13px;
+        }
+        
+        .setting-group input:focus, .setting-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        /* Overlay for settings */
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .settings-overlay.open { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Leveling Assistant</h1>
+            <div class="header-controls">
+                <span class="status-badge status-stopped" id="trackingStatus">Stopped</span>
+                <button class="btn btn-secondary" id="settingsBtn">⚙ Settings</button>
+                <button class="btn btn-primary" id="startBtn">Start Tracking</button>
+                <button class="btn btn-danger" id="stopBtn" style="display: none;">Stop</button>
+            </div>
+        </header>
+        
+        <!-- Milestone Card (shown when milestone reached) -->
+        <div class="card full-width milestone-card hidden" id="milestoneCard">
+            <div class="milestone-header">
+                <div class="milestone-icon">🏁</div>
+                <div>
+                    <div class="milestone-title" id="milestoneTitle">Milestone Reached</div>
+                    <div class="milestone-subtitle" id="milestoneSubtitle">Compare your character to the target build</div>
+                </div>
+            </div>
+            <div class="milestone-actions">
+                <button class="btn btn-primary" id="runPipelineBtn">Run Pipeline Comparison</button>
+                <button class="btn btn-secondary" id="dismissMilestoneBtn">Dismiss</button>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <!-- Character & Zone -->
+            <div class="card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    Character & Zone
+                </h2>
+                <div class="zone-info">
+                    <div class="zone-name" id="zoneName">Waiting for log data...</div>
+                    <div class="zone-meta">
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg> Act <span id="zoneAct">-</span></span>
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Level <span id="zoneLevel">-</span></span>
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> <span id="charLevel">1</span></span>
+                    </div>
+                    <div class="lab-trial-badge hidden" id="labTrialBadge">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Lab Trial in: <span id="labTrialZone">-</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Gem Recommendation -->
+            <div class="card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    Next Gem Recommendations
+                </h2>
+                <div class="gem-list" id="gemList">
+                    <div class="gem-card" style="justify-content: center; color: var(--fg-muted);">
+                        Start tracking to see gem recommendations
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Passive Node -->
+            <div class="card passive-tree-card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+                    Next Passive Tree Node
+                </h2>
+                <div id="passiveNodes">
+                    <div style="text-align: center; color: var(--fg-muted); padding: 40px;">
+                        Start tracking to see passive recommendations
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quest Progress -->
+            <div class="card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    Quest Progress
+                </h2>
+                <div class="quest-list" id="questList">
+                    <div style="text-align: center; color: var(--fg-muted); padding: 20px;">
+                        Quest completions will appear here
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Log -->
+            <div class="card full-width">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Event Log
+                </h2>
+                <div class="log-feed" id="logFeed">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-type">INFO</span>
+                        <span>Waiting for client.txt log data...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2 style="font-size: 18px;">Settings</h2>
+            <button class="modal-close" id="closeSettingsBtn">&times;</button>
+        </div>
+        
+        <div class="setting-group">
+            <label>PoE Log Path</label>
+            <input type="text" id="settingLogPath" value="" placeholder="Auto-detected">
+        </div>
+        
+        <div class="setting-group">
+            <label>Target Build</label>
+            <select id="settingTargetBuild">
+                <option value="earthshatter_berserker_god_tier">Earthshatter Berserker - God Tier</option>
+                <option value="earthshatter_berserker_budget">Earthshatter Berserker - Budget</option>
+                <option value="earthshatter_berserker_hc">Earthshatter Berserker - HC</option>
+                <option value="kinetic_blast_wander">Kinetic Blast Wander</option>
+            </select>
+        </div>
+        
+        <div class="setting-group">
+            <label>League</label>
+            <input type="text" id="settingLeague" value="Settlers">
+        </div>
+        
+        <div class="setting-group">
+            <label>Character Class</label>
+            <select id="settingClass">
+                <option value="Marauder">Marauder</option>
+                <option value="Duelist">Duelist</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Shadow">Shadow</option>
+                <option value="Witch">Witch</option>
+                <option value="Templar">Templar</option>
+                <option value="Scion">Scion</option>
+            </select>
+        </div>
+        
+        <div class="setting-group">
+            <label>Ascendancy</label>
+            <select id="settingAscendancy">
+                <option value="Berserker">Berserker</option>
+                <option value="Juggernaut">Juggernaut</option>
+                <option value="Chieftain">Chieftain</option>
+            </select>
+        </div>
+        
+        <div class="setting-group">
+            <label>Auto-start on page load</label>
+            <input type="checkbox" id="settingAutoStart">
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let isTracking = false;
+        let eventSource = null;
+        let settings = {};
+        
+        // DOM Elements
+        const elements = {
+            trackingStatus: document.getElementById('trackingStatus'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+            settingsOverlay: document.getElementById('settingsOverlay'),
+            settingsPanel: document.getElementById('settingsPanel'),
+            zoneName: document.getElementById('zoneName'),
+            zoneAct: document.getElementById('zoneAct'),
+            zoneLevel: document.getElementById('zoneLevel'),
+            charLevel: document.getElementById('charLevel'),
+            labTrialBadge: document.getElementById('labTrialBadge'),
+            labTrialZone: document.getElementById('labTrialZone'),
+            gemList: document.getElementById('gemList'),
+            passiveNodes: document.getElementById('passiveNodes'),
+            questList: document.getElementById('questList'),
+            logFeed: document.getElementById('logFeed'),
+            milestoneCard: document.getElementById('milestoneCard'),
+            milestoneTitle: document.getElementById('milestoneTitle'),
+            milestoneSubtitle: document.getElementById('milestoneSubtitle'),
+            runPipelineBtn: document.getElementById('runPipelineBtn'),
+            dismissMilestoneBtn: document.getElementById('dismissMilestoneBtn'),
+            settingLogPath: document.getElementById('settingLogPath'),
+            settingTargetBuild: document.getElementById('settingTargetBuild'),
+            settingLeague: document.getElementById('settingLeague'),
+            settingClass: document.getElementById('settingClass'),
+            settingAscendancy: document.getElementById('settingAscendancy'),
+            settingAutoStart: document.getElementById('settingAutoStart')
+        };
+        
+        // Initialize
+        function init() {
+            loadSettings();
+            setupEventListeners();
+            
+            if (settings.autoStart) {
+                startTracking();
+            }
+        }
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('pob_leveling_settings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                applySettings();
+            } else {
+                // Defaults
+                settings = {
+                    logPath: '/Users/joecrawford/Documents/My Games/Path of Exile/logs/client.txt',
+                    targetBuild: 'earthshatter_berserker_god_tier',
+                    league: 'Settlers',
+                    charClass: 'Marauder',
+                    ascendancy: 'Berserker',
+                    autoStart: false
+                };
+                saveSettings();
+            }
+        }
+        
+        function applySettings() {
+            elements.settingLogPath.value = settings.logPath || '';
+            elements.settingTargetBuild.value = settings.targetBuild || 'earthshatter_berserker_god_tier';
+            elements.settingLeague.value = settings.league || 'Settlers';
+            elements.settingClass.value = settings.charClass || 'Marauder';
+            elements.settingAscendancy.value = settings.ascendancy || 'Berserker';
+            elements.settingAutoStart.checked = settings.autoStart || false;
+        }
+        
+        function saveSettings() {
+            settings = {
+                logPath: elements.settingLogPath.value,
+                targetBuild: elements.settingTargetBuild.value,
+                league: elements.settingLeague.value,
+                charClass: elements.settingClass.value,
+                ascendancy: elements.settingAscendancy.value,
+                autoStart: elements.settingAutoStart.checked
+            };
+            localStorage.setItem('pob_leveling_settings', JSON.stringify(settings));
+        }
+        
+        function setupEventListeners() {
+            // Start/Stop
+            elements.startBtn.addEventListener('click', startTracking);
+            elements.stopBtn.addEventListener('click', stopTracking);
+            
+            // Settings
+            elements.settingsBtn.addEventListener('click', openSettings);
+            elements.closeSettingsBtn.addEventListener('click', closeSettings);
+            elements.settingsOverlay.addEventListener('click', closeSettings);
+            
+            elements.settingLogPath.addEventListener('change', saveSettings);
+            elements.settingTargetBuild.addEventListener('change', saveSettings);
+            elements.settingLeague.addEventListener('change', saveSettings);
+            elements.settingClass.addEventListener('change', saveSettings);
+            elements.settingAscendancy.addEventListener('change', saveSettings);
+            elements.settingAutoStart.addEventListener('change', saveSettings);
+            
+            // Milestone
+            elements.runPipelineBtn.addEventListener('click', runPipelineComparison);
+            elements.dismissMilestoneBtn.addEventListener('click', dismissMilestone);
+        }
+        
+        function startTracking() {
+            if (isTracking) return;
+            
+            isTracking = true;
+            elements.trackingStatus.textContent = 'Tracking';
+            elements.trackingStatus.className = 'status-badge status-tracking';
+            elements.startBtn.style.display = 'none';
+            elements.stopBtn.style.display = 'inline-block';
+            
+            // Connect to backend via SSE or WebSocket
+            connectToBackend();
+            
+            addLogEntry('INFO', 'Leveling tracker started');
+        }
+        
+        function stopTracking() {
+            if (!isTracking) return;
+            
+            isTracking = false;
+            elements.trackingStatus.textContent = 'Stopped';
+            elements.trackingStatus.className = 'status-badge status-stopped';
+            elements.startBtn.style.display = 'inline-block';
+            elements.stopBtn.style.display = 'none';
+            
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            
+            addLogEntry('INFO', 'Leveling tracker stopped');
+        }
+        
+        function connectToBackend() {
+            // Build query params from settings
+            const params = new URLSearchParams({
+                log: settings.logPath,
+                build: settings.targetBuild,
+                league: settings.league,
+                class: settings.charClass,
+                ascendancy: settings.ascendancy
+            });
+            
+            // In real implementation, this would connect to a Python backend
+            // For now, simulate with mock data for demo
+            simulateBackend();
+        }
+        
+        function simulateBackend() {
+            // Simulate receiving state updates
+            let simulatedLevel = 1;
+            let simulatedZone = 'Twilight Strand';
+            let simulatedAct = 1;
+            const zones = ['Twilight Strand', 'The Coast', 'Mud Flats', 'Submerged Passage', 'The Ledge', 'Lower Prison'];
+            let zoneIndex = 0;
+            
+            const interval = setInterval(() => {
+                if (!isTracking) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                // Simulate events
+                const events = [
+                    { type: 'zone', zone: zones[zoneIndex % zones.length], act: simulatedAct },
+                    { type: 'level', level: simulatedLevel },
+                    { type: 'quest', quest: 'enemy_at_the_gate' },
+                    { type: 'milestone', title: 'Act 1 Complete', subtitle: 'Merveil defeated' }
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                
+                if (event.type === 'zone') {
+                    zoneIndex++;
+                    simulatedZone = event.zone;
+                    simulatedAct = event.act;
+                    updateZone(simulatedZone, simulatedAct, 1);
+                    addLogEntry('ZONE', `Entered ${simulatedZone} (Act ${simulatedAct})`);
+                } else if (event.type === 'level') {
+                    simulatedLevel++;
+                    updateLevel(simulatedLevel);
+                    addLogEntry('LEVEL', `Reached level ${simulatedLevel}`);
+                } else if (event.type === 'quest') {
+                    addQuest(event.quest);
+                    addLogEntry('QUEST', `Completed: ${event.quest}`);
+                } else if (event.type === 'milestone') {
+                    showMilestone(event.title, event.subtitle);
+                }
+            }, 5000);
+        }
+        
+        function updateZone(name, act, level) {
+            elements.zoneName.textContent = name;
+            elements.zoneAct.textContent = act;
+            elements.zoneLevel.textContent = level || '-';
+            
+            // Check for lab trial
+            const labTrialZones = ['Lower Prison', 'Chamber of Sins', 'The Sewers', 'The Mines', 'Belly of the Beast', 'The Ossuary'];
+            if (labTrialZones.some(z => name.includes(z))) {
+                elements.labTrialZone.textContent = name;
+                elements.labTrialBadge.classList.remove('hidden');
+            } else {
+                elements.labTrialBadge.classList.add('hidden');
+            }
+        }
+        
+        function updateLevel(level) {
+            elements.charLevel.textContent = level;
+            
+            // Update gem recommendations based on level
+            updateGemRecommendations(level);
+            updatePassiveRecommendations(level);
+        }
+        
+        function updateGemRecommendations(level) {
+            // Mock gem data based on level
+            const gemsByLevel = {
+                1: [{name: 'Earthshatter', attr: 1, level: 1, quest: ''}, {name: 'Lifetap Support', attr: 1, level: 4, quest: 'the_caged_brute1'}],
+                4: [{name: 'Melee Physical Damage', attr: 1, level: 4, quest: ''}, {name: 'Pulverise', attr: 1, level: 1, quest: 'the_caged_brute2'}],
+                8: [{name: 'Brutality', attr: 1, level: 8, quest: ''}, {name: 'Added Fire Damage', attr: 1, level: 8, quest: 'the_caged_brute1'}],
+                12: [{name: 'Overexertion', attr: 1, level: 12, quest: 'a_fixture_of_fate'}],
+                16: [{name: 'Battlemage\'s Cry', attr: 1, level: 16, quest: 'intruders_in_black'}, {name: 'Ancestral Cry', attr: 1, level: 16, quest: 'intruders_in_black'}],
+                24: [{name: 'Pride', attr: 1, level: 24, quest: 'lost_in_love'}, {name: 'Autoexertion', attr: 1, level: 24, quest: 'lost_in_love'}],
+                28: [{name: 'Impending Doom', attr: 3, level: 28, quest: 'sever_the_right_hand'}],
+                38: [{name: 'Circle of Guilt', attr: 2, level: 38, quest: 'sever_the_right_hand'}]
+            };
+            
+            // Find applicable gems
+            let applicableGems = [];
+            for (const lvl in gemsByLevel) {
+                if (parseInt(lvl) <= level) {
+                    applicableGems.push(...gemsByLevel[lvl]);
+                }
+            }
+            
+            // Show top 3
+            const showGems = applicableGems.slice(-3);
+            
+            elements.gemList.innerHTML = showGems.map((gem, i) => {
+                const attrNames = {1: 'STR', 2: 'DEX', 3: 'INT'};
+                const attrColors = {1: 'gem-str', 2: 'gem-dex', 3: 'gem-int'};
+                const isCurrent = i === showGems.length - 1;
+                
+                return `
+                    <div class="gem-card ${isCurrent ? 'current' : ''}">
+                        <div class="gem-icon ${attrColors[gem.attr]}">${attrNames[gem.attr]}</div>
+                        <div class="gem-info">
+                            <div class="gem-name">${gem.name}</div>
+                            <div class="gem-meta">
+                                <span>Level ${gem.level}</span>
+                                <span>${attrNames[gem.attr]}</span>
+                            </div>
+                            ${gem.quest ? `<div class="gem-quest-info">Unlocks via quest: ${gem.quest.replace(/_/g, ' ')}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="gem-card" style="justify-content: center; color: var(--fg-muted);">No gems available at this level</div>';
+        }
+        
+        function updatePassiveRecommendations(level) {
+            // Mock passive nodes
+            const nodes = [
+                {id: '1', name: 'Marauder Start', type: 'normal', stats: ['+10 Strength']},
+                {id: '2', name: 'Life Node', type: 'normal', stats: ['+5% Life']},
+                {id: '3', name: 'Armour Mastery', type: 'mastery', stats: ['+1% Max Res']},
+                {id: '4', name: 'Warcry Effect', type: 'notable', stats: ['20% Warcry Buff Effect']},
+                {id: '5', name: 'Rage Mastery', type: 'mastery', stats: ['+10 Rage']}
+            ];
+            
+            // Show next 2 based on level
+            const showNodes = nodes.slice(0, Math.min(2, Math.floor(level / 10) + 1));
+            
+            elements.passiveNodes.innerHTML = showNodes.map((node, i) => `
+                <div class="passive-node ${i === 0 ? 'current' : ''}">
+                    <div class="passive-node-type ${node.type}">${node.type.charAt(0).toUpperCase()}</div>
+                    <div class="passive-node-info">
+                        <div class="passive-node-name">${node.name}</div>
+                        <div class="passive-node-stats">${node.stats.join(', ')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addQuest(questName) {
+            const quests = ['enemy_at_the_gate', 'mercy_mission', 'the_caged_brute1', 'the_caged_brute2', 'intruders_in_black', 'sharp_and_cruel', 'the_siren\'s_cadence', 'a_fixture_of_fate', 'lost_in_love', 'sever_the_right_hand'];
+            const quest = questName || quests[Math.floor(Math.random() * quests.length)];
+            
+            const item = document.createElement('div');
+            item.className = 'quest-item completed';
+            item.innerHTML = `
+                <div class="quest-icon">✓</div>
+                <span>${quest.replace(/_/g, ' ')}</span>
+            `;
+            
+            // Remove placeholder
+            const placeholder = elements.questList.querySelector('div[style*="text-align"]');
+            if (placeholder) placeholder.remove();
+            
+            elements.questList.insertBefore(item, elements.questList.firstChild);
+        }
+        
+        function showMilestone(title, subtitle) {
+            elements.milestoneTitle.textContent = title;
+            elements.milestoneSubtitle.textContent = subtitle;
+            elements.milestoneCard.classList.remove('hidden');
+            elements.trackingStatus.textContent = 'Milestone!';
+            elements.trackingStatus.className = 'status-badge status-milestone';
+            
+            addLogEntry('MILESTONE', `${title}: ${subtitle}`);
+        }
+        
+        function dismissMilestone() {
+            elements.milestoneCard.classList.add('hidden');
+            elements.trackingStatus.textContent = 'Tracking';
+            elements.trackingStatus.className = 'status-badge status-tracking';
+        }
+        
+        function runPipelineComparison() {
+            addLogEntry('INFO', 'Running pipeline comparison...');
+            elements.runPipelineBtn.disabled = true;
+            elements.runPipelineBtn.textContent = 'Running...';
+            
+            setTimeout(() => {
+                addLogEntry('SUCCESS', 'Pipeline comparison complete. Check dashboard for results.');
+                elements.runPipelineBtn.disabled = false;
+                elements.runPipelineBtn.textContent = 'Run Pipeline Comparison';
+                dismissMilestone();
+            }, 3000);
+        }
+        
+        function openSettings() {
+            elements.settingsOverlay.classList.add('open');
+            elements.settingsPanel.classList.add('open');
+        }
+        
+        function closeSettings() {
+            elements.settingsOverlay.classList.remove('open');
+            elements.settingsPanel.classList.remove('open');
+        }
+        
+        function addLogEntry(type, message) {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type.toLowerCase()}`;
+            entry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-type ${type.toLowerCase()}">${type}</span>
+                <span>${message}</span>
+            `;
+            
+            elements.logFeed.insertBefore(entry, elements.logFeed.firstChild);
+            
+            // Keep only last 50 entries
+            while (elements.logFeed.children.length > 50) {
+                elements.logFeed.removeChild(elements.logFeed.lastChild);
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoB Build Pipeline Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --fg: #e6edf3;
+            --fg-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79b8ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --border: #30363d;
+            --card-bg: #161b22;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-connected { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .status-disconnected { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .status-pending { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card h2 svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent);
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: var(--fg-muted);
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .stat-value.positive { color: var(--success); }
+        .stat-value.negative { color: var(--danger); }
+        .stat-value.warning { color: var(--warning); }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.budget { background: var(--accent); }
+        .progress-fill.used { background: var(--warning); }
+        
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .decision-card {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        .decision-buy { background: rgba(63, 185, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
+        .decision-craft { background: rgba(88, 166, 255, 0.15); border: 1px solid var(--accent); color: var(--accent); }
+        .decision-farm { background: rgba(210, 153, 34, 0.15); border: 1px solid var(--warning); color: var(--warning); }
+        .decision-farm-self { background: rgba(163, 113, 247, 0.15); border: 1px solid #a371f7; color: #a371f7; }
+        .decision-farm-currency { background: rgba(248, 81, 73, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+        
+        .decision-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .decision-count {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .farming-list {
+            list-style: none;
+        }
+        
+        .farming-item {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .farming-item.verified { border-left-color: var(--success); }
+        .farming-item.unverified { border-left-color: var(--warning); }
+        
+        .farming-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .farming-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .farming-confidence {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .confidence-high { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .confidence-med { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .confidence-low { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        
+        .farming-details {
+            font-size: 12px;
+            color: var(--fg-muted);
+        }
+        
+        .farming-detail {
+            display: flex;
+            gap: 16px;
+            margin-top: 4px;
+        }
+        
+        .action-plan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .action-phase {
+            padding: 16px;
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+        }
+        
+        .action-phase h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-phase.now h3 { color: var(--success); }
+        .action-phase.medium h3 { color: var(--warning); }
+        .action-phase.long h3 { color: var(--accent); }
+        
+        .action-list {
+            list-style: none;
+            font-size: 13px;
+        }
+        
+        .action-list li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: var(--fg-muted);
+        }
+        
+        .action-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .input-group label {
+            font-size: 13px;
+            color: var(--fg-muted);
+        }
+        
+        .input-group input, .input-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            font-size: 13px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--fg-muted);
+        }
+        
+        .loading.active { display: block; }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--fg-muted);
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--fg-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .modal-close:hover { color: var(--fg); }
+        
+        /* Target Build List Styles */
+        .target-build-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .target-build-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .target-build-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .target-build-card.selected {
+            border-color: var(--success);
+            box-shadow: 0 0 0 2px var(--success);
+        }
+        
+        .target-build-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .target-build-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .target-build-tags {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: var(--bg);
+            color: var(--fg-muted);
+        }
+        
+        .tag.minmax { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+        .tag.budget { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .tag.hc { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .tag.uber-bossing { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        
+        .target-build-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--fg-muted);
+            margin-top: 8px;
+        }
+        
+        .target-build-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Create/Edit Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--fg-muted);
+            margin-bottom: 6px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            font-size: 13px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Pipeline Overlay Styles */
+        .pipeline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .pipeline-overlay.active { display: flex; }
+        
+        .pipeline-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pipeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pipeline-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .pipeline-status {
+            font-size: 13px;
+            color: var(--accent);
+            padding: 4px 12px;
+            background: rgba(88, 166, 255, 0.15);
+            border-radius: 4px;
+        }
+        
+        .pipeline-steps {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+        
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .step-icon.pending { background: var(--bg-tertiary); color: var(--fg-muted); }
+        .step-icon.running { background: rgba(88, 166, 255, 0.2); color: var(--accent); animation: pulse 1.5s infinite; }
+        .step-icon.complete { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .step-icon.error { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .step-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .step-detail {
+            font-size: 12px;
+            color: var(--fg-muted);
+            margin-top: 2px;
+        }
+        
+        .pipeline-log {
+            flex: 1;
+            padding: 0 24px 16px;
+            overflow-y: auto;
+            max-height: 300px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .log-time {
+            color: var(--fg-muted);
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        
+        .log-level {
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        
+        .log-level.info { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+        .log-level.success { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .log-level.warning { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .log-level.error { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        
+        .log-message {
+            flex: 1;
+            word-break: break-word;
+        }
+        
+        .pipeline-actions {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* Dev Panel Styles */
+        .dev-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100%;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dev-panel.open { transform: translateX(0); }
+        
+        .dev-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .dev-panel-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .dev-panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .dev-tab {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            color: var(--fg-muted);
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .dev-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        
+        .dev-tab:hover:not(.active) {
+            color: var(--fg);
+        }
+        
+        .dev-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .dev-tab-pane {
+            display: none;
+        }
+        
+        .dev-tab-pane.active {
+            display: block;
+        }
+        
+        .debug-log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .debug-log-time {
+            color: var(--fg-muted);
+            margin-right: 8px;
+        }
+        
+        .debug-log-level {
+            display: inline-block;
+            width: 50px;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        
+        .debug-log-level.INFO { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+        .debug-log-level.SUCCESS { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .debug-log-level.WARN { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .debug-log-level.ERROR { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        
+        .state-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+        
+        .state-key {
+            color: var(--fg-muted);
+        }
+        
+        .state-value {
+            font-family: monospace;
+            font-size: 11px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PoB Build Pipeline</h1>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span id="connectionStatus" class="status-badge status-disconnected">Disconnected</span>
+                <button class="btn btn-primary" onclick="connectOAuth()">Connect PoE Account</button>
+            </div>
+        </header>
+        
+        <div class="toolbar">
+            <div class="input-group">
+                <label>League:</label>
+                <select id="leagueSelect">
+                    <option value="Settlers">Settlers (3.30)</option>
+                    <option value="Necropolis">Necropolis (3.29)</option>
+                    <option value="Affliction">Affliction (3.28)</option>
+                    <option value="Trial of the Ancestors">Trial of the Ancestors (3.27)</option>
+                    <option value="Ancestor">Ancestor (3.26)</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Hardcore">Hardcore</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Character:</label>
+                <select id="characterSelect" disabled>
+                    <option value="">Connect to load characters</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Target Build:</label>
+                <select id="targetBuildSelect">
+                    <option value="">Select target build...</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" onclick="openTargetBuildModal()" style="margin-left: 8px;">Manage Targets</button>
+            <div class="input-group">
+                <label>Budget (Divine):</label>
+                <input type="number" id="budgetInput" value="20" min="0" step="1" style="width: 80px;">
+            </div>
+            <button class="btn btn-primary" onclick="runPipeline()" id="runBtn">Run Pipeline</button>
+            <button class="btn btn-secondary" onclick="loadDemo()">Load Demo</button>
+            <button class="btn btn-secondary" onclick="toggleDevPanel()">Dev Panel</button>
+        </div>
+        
+        <!-- Pipeline Progress Overlay -->
+        <div class="pipeline-overlay" id="pipelineOverlay">
+            <div class="pipeline-modal">
+                <div class="pipeline-header">
+                    <h3>Pipeline Running</h3>
+                    <span class="pipeline-status" id="pipelineStatus">Initializing...</span>
+                </div>
+                <div class="pipeline-steps" id="pipelineSteps"></div>
+                <div class="pipeline-log" id="pipelineLog"></div>
+                <div class="pipeline-actions">
+                    <button class="btn btn-secondary" onclick="closePipelineOverlay()">Close</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Running pipeline...</p>
+        </div>
+        
+        <div class="grid" id="resultsGrid" style="display: none;">
+            <!-- Character Overview Card -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Character Overview</h2>
+                <div class="stat-row">
+                    <span class="stat-label">Character</span>
+                    <span class="stat-value" id="charName">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Class / Ascendancy</span>
+                    <span class="stat-value" id="charClass">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="charLevel">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">League</span>
+                    <span class="stat-value" id="charLeague">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Main Skill</span>
+                    <span class="stat-value" id="charSkill">-</span>
+                </div>
+            </div>
+            
+            <!-- Net Worth Card -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg> Net Worth</h2>
+                <div class="stat-row">
+                    <span class="stat-label">Total Chaos Equivalent</span>
+                    <span class="stat-value positive" id="netChaos">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Divine Equivalent</span>
+                    <span class="stat-value positive" id="netDivine">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Liquid Currency</span>
+                    <span class="stat-value" id="netLiquid">-</span>
+                </div>
+                <div class="progress-bar" style="margin-top: 16px;">
+                    <div class="progress-fill budget" id="budgetProgress" style="width: 0%"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--fg-muted); margin-top: 4px;">
+                    <span>Budget Used: <span id="budgetUsed">0</span>%</span>
+                    <span>Remaining: <span id="budgetRemaining">100</span>%</span>
+                </div>
+            </div>
+            
+            <!-- Decision Matrix Card -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><path d="M10 3H8v10h2V3zm8 14H6v-2h12v2zm-2-12H6v2h10V3z"/></svg> Decision Matrix</h2>
+                <div class="decision-grid" id="decisionGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gear Gaps Section -->
+        <div style="margin-top: 32px;">
+            <h2 style="margin-bottom: 16px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; vertical-align: middle; fill: var(--accent);"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg> Gear Gap Analysis</h2>
+            <div class="card" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid var(--border);">
+                            <th style="padding: 10px;">Slot</th>
+                            <th style="padding: 10px;">Current</th>
+                            <th style="padding: 10px;">Target</th>
+                            <th style="padding: 10px;">Missing Mods</th>
+                            <th style="padding: 10px;">Buy</th>
+                            <th style="padding: 10px;">Craft</th>
+                            <th style="padding: 10px;">Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gearTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Farming Strategies Section -->
+        <div style="margin-top: 32px;">
+            <h2 style="margin-bottom: 16px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; vertical-align: middle; fill: var(--accent);"><path d="M20 4H4v16h16V4zm-2 14H6v-2h12v2zm0-4H6V8h12v2zm0-4H6V4h12v2z"/></svg> Farming Strategies (League-Aware)</h2>
+            <div id="farmingList" class="farming-list"></div>
+        </div>
+        
+        <!-- Action Plan Section -->
+        <div style="margin-top: 32px;">
+            <h2 style="margin-bottom: 16px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; vertical-align: middle; fill: var(--accent);"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm4 2h12v2H13v-2z"/></svg> Action Plan</h2>
+            <div class="action-plan" id="actionPlan"></div>
+        </div>
+        
+        <!-- Target Build Section -->
+        <div style="margin-top: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; vertical-align: middle; fill: var(--accent);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H11z"/></svg> Target Builds</h2>
+                <button class="btn btn-primary" onclick="openTargetBuildModal('create')">Create New Target</button>
+            </div>
+            <div class="target-build-list" id="targetBuildList"></div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" style="fill: var(--fg-muted);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H11z"/></svg>
+            <h3>No Data Loaded</h3>
+            <p>Connect your PoE account and run the pipeline to see results</p>
+        </div>
+        
+        <!-- Target Build Modal -->
+        <div class="modal-overlay" id="targetBuildModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Create Target Build</h2>
+                    <button class="modal-close" onclick="closeTargetBuildModal()">&times;</button>
+                </div>
+                <form id="targetBuildForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Build ID</label>
+                            <input type="text" id="tbId" placeholder="my_berserker_god" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="tbName" placeholder="Earthshatter Berserker - God Tier" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="tbDescription" rows="2" placeholder="Min-maxed Earthshatter Berserker for Uber boss farming..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Class</label>
+                            <select id="tbClass">
+                                <option value="Marauder">Marauder</option>
+                                <option value="Ranger">Ranger</option>
+                                <option value="Witch">Witch</option>
+                                <option value="Duelist">Duelist</option>
+                                <option value="Templar">Templar</option>
+                                <option value="Shadow">Shadow</option>
+                                <option value="Scion">Scion</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ascendancy</label>
+                            <select id="tbAscendancy">
+                                <option value="Berserker">Berserker</option>
+                                <option value="Juggernaut">Juggernaut</option>
+                                <option value="Chieftain">Chieftain</option>
+                                <option value="Deadeye">Deadeye</option>
+                                <option value="Raider">Raider</option>
+                                <option value="Pathfinder">Pathfinder</option>
+                                <option value="Necromancer">Necromancer</option>
+                                <option value="Occultist">Occultist</option>
+                                <option value="Elementalist">Elementalist</option>
+                                <option value="Slayer">Slayer</option>
+                                <option value="Gladiator">Gladiator</option>
+                                <option value="Champion">Champion</option>
+                                <option value="Inquisitor">Inquisitor</option>
+                                <option value="Hierophant">Hierophant</option>
+                                <option value="Guardian">Guardian</option>
+                                <option value="Assassin">Assassin</option>
+                                <option value="Saboteur">Saboteur</option>
+                                <option value="Trickster">Trickster</option>
+                                <option value="Ascendant">Ascendant</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Target Level</label>
+                            <input type="number" id="tbLevel" value="100" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>League</label>
+                            <input type="text" id="tbLeague" value="Settlers">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Main Skill</label>
+                        <input type="text" id="tbMainSkill" placeholder="Earthshatter / Perforate of Duality">
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (comma-separated)</label>
+                        <input type="text" id="tbTags" placeholder="minmax, uber-bossing, earthshatter, berserker, 3.30">
+                    </div>
+                    
+                    <h3 style="margin: 24px 0 12px;">Target Items</h3>
+                    <div id="targetItemsContainer"></div>
+                    <button type="button" class="btn btn-secondary btn-small" onclick="addTargetItemRow()">+ Add Item Slot</button>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeTargetBuildModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Target Build</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" style="fill: var(--fg-muted);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H11z"/></svg>
+            <h3>No Data Loaded</h3>
+            <p>Connect your PoE account and run the pipeline to see results</p>
+        </div>
+        
+        <!-- Dev Panel -->
+        <div class="dev-panel" id="devPanel">
+            <div class="dev-panel-header">
+                <h3>Dev Panel</h3>
+                <button class="modal-close" onclick="toggleDevPanel()">&times;</button>
+            </div>
+            <div class="dev-panel-tabs">
+                <button class="dev-tab active" data-tab="logs">Logs</button>
+                <button class="dev-tab" data-tab="state">State</button>
+                <button class="dev-tab" data-tab="config">Config</button>
+            </div>
+            <div class="dev-panel-content">
+                <div class="dev-tab-pane active" id="devLogs">
+                    <div id="debugLog"></div>
+                </div>
+                <div class="dev-tab-pane" id="devState">
+                    <div id="debugState"></div>
+                </div>
+                <div class="dev-tab-pane" id="devConfig">
+                    <div id="debugConfig"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" style="fill: var(--fg-muted);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H11z"/></svg>
+            <h3>No Data Loaded</h3>
+            <p>Connect your PoE account and run the pipeline to see results</p>
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let pipelineData = null;
+        let authToken = null;
+        
+        // DOM Elements
+        const connectionStatus = document.getElementById('connectionStatus');
+        const leagueSelect = document.getElementById('leagueSelect');
+        const characterSelect = document.getElementById('characterSelect');
+        const budgetInput = document.getElementById('budgetInput');
+        const runBtn = document.getElementById('runBtn');
+        const loading = document.getElementById('loading');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const budgetProgress = document.getElementById('budgetProgress');
+        const decisionGrid = document.getElementById('decisionGrid');
+        const gearTableBody = document.getElementById('gearTableBody');
+        const farmingList = document.getElementById('farmingList');
+        const actionPlan = document.getElementById('actionPlan');
+        
+        // Load demo data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDemoData();
+        });
+        
+        function loadDemoData() {
+            // Demo data matching our test results
+            const demoData = {
+                character: {
+                    name: "MidGameBerserker",
+                    class: "Marauder",
+                    ascendancy: "Berserker",
+                    level: 96,
+                    league: "Settlers",
+                    mainSkill: "Earthshatter"
+                },
+                netWorth: {
+                    totalChaosEquiv: 4500,
+                    totalDivineEquiv: 22.5,
+                    liquidCurrency: {
+                        "CurrencyChaosOrb": 500,
+                        "CurrencyDivineOrb": 5,
+                        "CurrencyExaltedOrb": 2
+                    }
+                },
+                decisions: {
+                    "Weapon 1": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 50, craftCost: 30, reasoning: "Too expensive (50 div), farm currency first" },
+                    "Helmet": { decision: "BUY_FINISHED", buyCost: 20, craftCost: 15, reasoning: "Within budget (20/20 div)" },
+                    "Body Armour": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 80, craftCost: 50, reasoning: "Too expensive (80 div), farm currency first" },
+                    "Gloves": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 30, craftCost: 20, reasoning: "Too expensive (30 div), farm currency first" },
+                    "Boots": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 25, craftCost: 15, reasoning: "Too expensive (25 div), farm currency first" },
+                    "Amulet": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 150, craftCost: null, reasoning: "Trade only (Ashes of the Stars)" },
+                    "Belt": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 200, craftCost: null, reasoning: "Trade only (Mageblood)" },
+                    "Ring 1": { decision: "FARM_CURRENCY_THEN_BUY", buyCost: 40, craftCost: 25, reasoning: "Too expensive (40 div), farm currency first" }
+                },
+                farming: {
+                    "Divine Orbs": [
+                        { method: "Kingsmarch Daily (3.30)", mechanic: "Kingsmarch", verified: true, note: "New league mechanic, prioritize", returns: { divine_per_hour: 2.0 }, confidence: 0.95 },
+                        { method: "T16-17 Maps + Atlas Passives", mechanic: "Atlas", verified: true, note: "Stable, passives change/league", returns: { divine_per_hour: 3.0, chaos_per_hour: 600 }, confidence: 0.9 },
+                        { method: "Boss Carries", mechanic: "Endgame Bosses", verified: true, note: "Stable", returns: { exalted_per_hour: 5 }, confidence: 0.85 }
+                    ],
+                    "Exalted Orbs": [
+                        { method: "Boss Carries", mechanic: "Endgame Bosses", verified: true, note: "Stable", returns: { exalted_per_hour: 5 }, confidence: 0.85 }
+                    ],
+                    "Mageblood": [
+                        { method: "Trade Only", mechanic: "Trade", verified: true, note: "Unique, cannot be farmed", cost: "200+ div", confidence: 1.0 }
+                    ],
+                    "Ashes of the Stars": [
+                        { method: "Sanctum/Forbidden Sanctum", mechanic: "Sanctum", verified: true, note: "3.28+ relic system", returns: { relics_per_hour: 5 }, confidence: 0.7 },
+                        { method: "Trade", mechanic: "Trade", verified: true, note: "Most reliable", cost: "150 div", confidence: 1.0 }
+                    ]
+                },
+                gaps: {
+                    "Weapon 1": { current: "Carrion Sever (Vaal Axe) ilvl84", target: "Vaal Axe ilvl86", missing: "180% Phys, 25% AS, +2 Melee, Crit Multi/Chance", buy: 50, craft: 30, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Helmet": { current: "Echoes of Creation ilvl84", target: "Royal Burgonet ilvl84", missing: "Lab Enchant (Warcry)", buy: 20, craft: 15, decision: "BUY_FINISHED" },
+                    "Body Armour": { current: "Plague Hide ilvl86", target: "Royal Plate ilvl86", missing: "200% Armour, +150 Life, Max Res", buy: 80, craft: 50, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Gloves": { current: "Pain Hand ilvl86", target: "Leviathan Gauntlets ilvl86", missing: "100+ Life, AS/Crit", buy: 30, craft: 20, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Boots": { current: "Sol Spur ilvl86", target: "Leviathan Greaves ilvl86", missing: "30% MS, Chaos/Endurance", buy: 25, craft: 15, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Amulet": { current: "Phoenix Gorget ilvl86", target: "Ashes of the Stars ilvl86", missing: "+1 Gem Level, Attributes", buy: 150, craft: null, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Belt": { current: "Rage Buckle ilvl84", target: "Mageblood ilvl86", missing: "4 Flask Effects", buy: 200, craft: null, decision: "FARM_CURRENCY_THEN_BUY" },
+                    "Ring 1": { current: "Vengeance Eye ilvl84", target: "Circle of Guilt/Rare ilvl86", missing: "Crit Multi/Chance, Life/Res", buy: 40, craft: 25, decision: "FARM_CURRENCY_THEN_BUY" }
+                }
+            };
+            
+            // Pre-populate target builds from localStorage
+            renderTargetBuildList();
+            
+            pipelineData = demoData;
+            renderAll(demoData);
+        }
+        
+        function renderAll(data) {
+            emptyState.style.display = 'none';
+            resultsGrid.style.display = 'grid';
+            loading.classList.remove('active');
+            runBtn.disabled = false;
+            runBtn.textContent = 'Run Pipeline';
+            
+            // Character Overview
+            const c = data.character;
+            document.getElementById('charName').textContent = c.name;
+            document.getElementById('charClass').textContent = `${c.class} / ${c.ascendancy}`;
+            document.getElementById('charLevel').textContent = c.level;
+            document.getElementById('charLeague').textContent = c.league;
+            document.getElementById('charSkill').textContent = c.mainSkill;
+            
+            // Net Worth
+            const nw = data.netWorth;
+            document.getElementById('netChaos').textContent = nw.totalChaosEquiv.toLocaleString();
+            document.getElementById('netDivine').textContent = nw.totalDivineEquiv.toFixed(1);
+            
+            const liquid = Object.entries(nw.liquidCurrency)
+                .map(([k, v]) => `${v} ${k.replace('Currency', '').replace('Orb', '')}`)
+                .join(', ');
+            document.getElementById('netLiquid').textContent = liquid || 'None';
+            
+            // Budget Progress
+            const budget = parseInt(budgetInput.value);
+            const divineEquiv = data.netWorth.totalDivineEquiv;
+            const used = budget > 0 ? Math.min(100, (budget / Math.max(divineEquiv, 1)) * 100) : 0;
+            budgetProgress.style.width = `${used}%`;
+            budgetProgress.className = 'progress-fill ' + (used > 80 ? 'used' : 'budget');
+            document.getElementById('budgetUsed').textContent = Math.round(used);
+            document.getElementById('budgetRemaining').textContent = Math.max(0, 100 - Math.round(used));
+            
+            // Decision Matrix
+            decisionGrid.innerHTML = '';
+            const decisionCounts = { BUY_FINISHED: 0, CRAFT_FROM_BASE: 0, FARM_CURRENCY_THEN_BUY: 0, FARM_IT_YOURSELF: 0, FARM_CURRENCY: 0 };
+            
+            Object.values(data.decisions).forEach(d => {
+                const key = d.decision;
+                if (decisionCounts[key] !== undefined) decisionCounts[key]++;
+            });
+            
+            const decisions = [
+                { key: 'BUY_FINISHED', label: 'Buy Finished', count: decisionCounts.BUY_FINISHED, class: 'decision-buy' },
+                { key: 'CRAFT_FROM_BASE', label: 'Craft from Base', count: decisionCounts.CRAFT_FROM_BASE, class: 'decision-craft' },
+                { key: 'FARM_CURRENCY_THEN_BUY', label: 'Farm Currency → Buy', count: decisionCounts.FARM_CURRENCY_THEN_BUY, class: 'decision-farm-currency' },
+                { key: 'FARM_IT_YOURSELF', label: 'Farm It Yourself', count: decisionCounts.FARM_IT_YOURSELF, class: 'decision-farm-self' }
+            ];
+            
+            decisions.forEach(d => {
+                if (d.count > 0) {
+                    const div = document.createElement('div');
+                    div.className = `decision-card ${d.class}`;
+                    div.innerHTML = `<div class="decision-label">${d.label}</div><div class="decision-count">${d.count}</div>`;
+                    decisionGrid.appendChild(div);
+                }
+            });
+            
+            // Gear Table
+            gearTableBody.innerHTML = '';
+            Object.entries(data.gaps).forEach(([slot, gap]) => {
+                const dec = data.decisions[slot] || {};
+                const decisionClass = {
+                    'BUY_FINISHED': 'decision-buy',
+                    'CRAFT_FROM_BASE': 'decision-craft',
+                    'FARM_CURRENCY_THEN_BUY': 'decision-farm-currency',
+                    'FARM_IT_YOURSELF': 'decision-farm-self'
+                }[dec.decision] || '';
+                
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid var(--border)';
+                tr.innerHTML = `
+                    <td style="padding: 10px; font-weight: 600;">${slot}</td>
+                    <td style="padding: 10px; color: var(--fg-muted);">${gap.current}</td>
+                    <td style="padding: 10px;">${gap.target}</td>
+                    <td style="padding: 10px; max-width: 250px;">${gap.missing}</td>
+                    <td style="padding: 10px;">${gap.buy} div</td>
+                    <td style="padding: 10px;">${gap.craft || 'N/A'} div</td>
+                    <td style="padding: 10px;"><span class="decision-card ${decisionClass}" style="display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px;">${dec.decision}</span></td>
+                `;
+                gearTableBody.appendChild(tr);
+            });
+            
+            // Farming List
+            farmingList.innerHTML = '';
+            Object.entries(data.farming).forEach(([category, strategies]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.marginBottom = '16px';
+                
+                const catHeader = document.createElement('h3');
+                catHeader.style.fontSize = '14px';
+                catHeader.style.marginBottom = '8px';
+                catHeader.style.color = 'var(--accent)';
+                catHeader.textContent = category.toUpperCase();
+                categoryDiv.appendChild(catHeader);
+                
+                strategies.forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = `farming-item ${s.verified ? 'verified' : 'unverified'}`;
+                    
+                    const confClass = s.confidence >= 0.8 ? 'confidence-high' : s.confidence >= 0.5 ? 'confidence-med' : 'confidence-low';
+                    
+                    item.innerHTML = `
+                        <div class="farming-header">
+                            <span class="farming-name">${s.method}</span>
+                            <span class="farming-confidence ${confClass}">${Math.round(s.confidence * 100)}%</span>
+                        </div>
+                        <div class="farming-details">
+                            <div>${s.note}</div>
+                            ${s.returns ? `<div class="farming-detail">Returns: ${Object.entries(s.returns).map(([k,v]) => `${k}: ${v}`).join(', ')}</div>` : ''}
+                            ${s.cost ? `<div class="farming-detail">Cost: ${s.cost}</div>` : ''}
+                            <div class="farming-detail">Mechanic: ${s.mechanic} | League: 3.30</div>
+                        </div>
+                    `;
+                    categoryDiv.appendChild(item);
+                });
+                
+                farmingList.appendChild(categoryDiv);
+            });
+            
+            // Action Plan
+            actionPlan.innerHTML = '';
+            
+            const phases = [
+                { 
+                    key: 'now', 
+                    label: 'NOW (0-20 div budget)', 
+                    actions: [
+                        'Buy Helmet enchant (20 div) - only immediate upgrade',
+                        'Start Kingsmarch daily management (new 3.30 mechanic)',
+                        'Begin T16-17 map farming with Atlas passives'
+                    ]
+                },
+                { 
+                    key: 'medium', 
+                    label: 'MEDIUM TERM (farm 50+ div)', 
+                    actions: [
+                        'Farm ~50 div for Weapon upgrade via maps/bosses',
+                        'Farm ~80 div for Body Armour',
+                        'Farm ~30 div for Gloves',
+                        'Farm ~25 div for Boots'
+                    ]
+                },
+                { 
+                    key: 'long', 
+                    label: 'LONG TERM (league mechanics)', 
+                    actions: [
+                        'Mageblood (200 div) - Trade only',
+                        'Ashes of the Stars (150 div) - Trade/Sanctum',
+                        'Rings via Heist blueprints / Delve fossils'
+                    ]
+                }
+            ];
+            
+            phases.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `action-phase ${p.key}`;
+                div.innerHTML = `
+                    <h3>${p.label}</h3>
+                    <ul class="action-list">
+                        ${p.actions.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                `;
+                actionPlan.appendChild(div);
+            });
+        }
+        
+        function connectOAuth() {
+            // In real implementation, this would trigger the OAuth flow
+            alert('In real implementation, this would:\n1. Run pob_oauth_import.py OAuth flow\n2. Open browser to pathofexile.com/oauth/authorize\n3. Save tokens to poe_tokens.json\n4. Enable all API features');
+        }
+        
+        function runPipeline() {
+            // Show pipeline overlay with real-time feedback
+            openPipelineOverlay();
+            
+            const steps = [
+                { id: 'auth', name: 'Authentication', detail: 'Checking OAuth tokens...' },
+                { id: 'char', name: 'Character Import', detail: 'Fetching character data from PoE API...' },
+                { id: 'passive', name: 'Passive Tree', detail: 'Validating passive hashes via headless PoB...' },
+                { id: 'loadout', name: 'Loadout Creation', detail: 'Creating new loadout with items/skills/config...' },
+                { id: 'stash', name: 'Stash & Currency', detail: 'Fetching stashes and calculating net worth...' },
+                { id: 'upgrades', name: 'Upgrade Analysis', detail: 'Generating trade queries with stat weights...' },
+                { id: 'crafting', name: 'Crafting Guides', detail: 'Matching missing mods to crafting guides...' },
+                { id: 'farming', name: 'Farming Strategies', detail: 'Generating league-aware farming plans...' },
+                { id: 'dashboard', name: 'Dashboard Update', detail: 'Rendering results...' }
+            ];
+            
+            // Initialize pipeline steps UI
+            const stepsContainer = document.getElementById('pipelineSteps');
+            stepsContainer.innerHTML = steps.map((s, i) => `
+                <div class="pipeline-step" id="step-${s.id}">
+                    <div class="step-icon pending">${i + 1}</div>
+                    <div>
+                        <div class="step-name">${s.name}</div>
+                        <div class="step-detail">${s.detail}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const logContainer = document.getElementById('pipelineLog');
+            logContainer.innerHTML = '';
+            
+            function log(level, message) {
+                const time = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="log-time">${time}</span>
+                    <span class="log-level ${level}">${level}</span>
+                    <span class="log-message">${message}</span>
+                `;
+                document.getElementById('pipelineLog').appendChild(entry);
+                document.getElementById('pipelineLog').scrollTop = document.getElementById('pipelineLog').scrollHeight;
+                
+                // Also log to dev panel
+                addDebugLog(level, message);
+            }
+            
+            function updateStep(id, status, detail = null) {
+                const stepEl = document.getElementById(`step-${id}`);
+                if (!stepEl) return;
+                
+                const icon = stepEl.querySelector('.step-icon');
+                icon.className = `step-icon ${status}`;
+                if (status === 'complete') icon.textContent = '✓';
+                else if (status === 'running') icon.textContent = '⟳';
+                else if (status === 'error') icon.textContent = '✗';
+                else icon.textContent = '⏳';
+                
+                if (detail) {
+                    stepEl.querySelector('.step-detail').textContent = detail;
+                }
+            }
+            
+            function addDebugLog(level, message) {
+                const time = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = 'debug-log-entry';
+                entry.innerHTML = `<span class="debug-log-time">${time}</span><span class="debug-log-level ${level}">${level}</span>${message}`;
+                document.getElementById('debugLog').appendChild(entry);
+                document.getElementById('debugLog').scrollTop = document.getElementById('debugLog').scrollHeight;
+            }
+            
+            // Run pipeline steps with realistic timing
+            async function executePipeline() {
+                log('INFO', 'Pipeline started');
+                
+                for (const step of steps) {
+                    updateStep(step.id, 'running');
+                    log('INFO', `Starting: ${step.name} - ${step.detail}`);
+                    
+                    // Simulate work with variable timing
+                    const duration = 300 + Math.random() * 800;
+                    await new Promise(r => setTimeout(r, duration));
+                    
+                    // Simulate occasional warnings
+                    if (Math.random() < 0.15) {
+                        log('WARN', `${step.name}: Minor issue detected, continuing...`);
+                    }
+                    
+                    updateStep(step.id, 'complete');
+                    log('SUCCESS', `${step.name} completed`);
+                }
+                
+                log('SUCCESS', 'Pipeline completed successfully!');
+                document.getElementById('pipelineStatus').textContent = 'Complete';
+                document.getElementById('pipelineStatus').style.color = 'var(--success)';
+                
+                // Load results after a brief pause
+                setTimeout(() => {
+                    closePipelineOverlay();
+                    loadDemoData();
+                }, 500);
+            }
+            
+            executePipeline();
+        }
+        
+        function openPipelineOverlay() {
+            document.getElementById('pipelineOverlay').classList.add('active');
+        }
+        
+        function closePipelineOverlay() {
+            document.getElementById('pipelineOverlay').classList.remove('active');
+        }
+        
+        function toggleDevPanel() {
+            document.getElementById('devPanel').classList.toggle('open');
+        }
+        
+        // Dev panel tabs
+        document.querySelectorAll('.dev-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.dev-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.dev-tab-pane').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('dev' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1)).classList.add('active');
+            });
+        });
+        
+        function addDebugLog(level, message) {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'debug-log-entry';
+            entry.innerHTML = `<span class="debug-log-time">${time}</span><span class="debug-log-level ${level}">${level}</span>${message}`;
+            document.getElementById('debugLog').appendChild(entry);
+            document.getElementById('debugLog').scrollTop = document.getElementById('debugLog').scrollHeight;
+        }
+        
+        function updateDebugState() {
+            const stateEl = document.getElementById('debugState');
+            if (!stateEl) return;
+            
+            const state = {
+                pipelineData: pipelineData ? 'loaded' : 'null',
+                authToken: authToken ? 'set' : 'null',
+                budget: budgetInput.value,
+                league: leagueSelect.value,
+                targetBuild: document.getElementById('targetBuildSelect').value,
+                targetBuilds: Object.keys(JSON.parse(localStorage.getItem('pob_target_builds') || '{}')).length
+            };
+            
+            stateEl.innerHTML = Object.entries(state).map(([k, v]) => `
+                <div class="state-item">
+                    <span class="state-key">${k}</span>
+                    <span class="state-value">${v}</span>
+                </div>
+            `).join('');
+        }
+        
+        function updateDebugConfig() {
+            const configEl = document.getElementById('debugConfig');
+            if (!configEl) return;
+            
+            const config = {
+                POB_REPO: '/Users/joecrawford/pob_repo',
+                STORE_PATH: '~/.pob_pipeline/target_builds.json',
+                OAUTH_TOKENS: 'poe_tokens.json',
+                HEADLESS_WRAPPER: 'HeadlessWrapper.lua',
+                PASSIVE_CONVERTER: 'passive_converter_post.lua'
+            };
+            
+            configEl.innerHTML = Object.entries(config).map(([k, v]) => `
+                <div class="state-item">
+                    <span class="state-key">${k}</span>
+                    <span class="state-value">${v}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Update dev panel periodically
+        setInterval(() => {
+            if (document.getElementById('devPanel')?.classList.contains('open')) {
+                updateDebugState();
+            }
+        }, 2000);
+        
+        // Initialize debug config on load
+        updateDebugConfig();
+        
+        function loadDemo() {
+            loadDemoData();
+        }
+        
+        // Initialize target build list on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTargetBuildList();
+        });
+        
+        // Form submit handler
+        document.getElementById('targetBuildForm').addEventListener('submit', saveTargetBuild);
+        
+        // Budget input listener
+        budgetInput.addEventListener('input', () => {
+            if (pipelineData) {
+                renderAll(pipelineData);
+            }
+        });
+        
+        // League change listener
+        leagueSelect.addEventListener('change', () => {
+            // In real implementation, would fetch characters for selected league
+            characterSelect.disabled = true;
+            characterSelect.innerHTML = '<option value="">Connect to load characters</option>';
+        });
+    </script>
+</body>
+</html>

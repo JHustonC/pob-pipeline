@@ -1149,6 +1149,296 @@ class TestDashboardJS(unittest.TestCase):
 
 
 # ============================================================
+# Farming Strategy Tests
+# ============================================================
+
+class TestFarmingStrategies(unittest.TestCase):
+    """Tests for pob_farming_strategies.py."""
+    
+    def setUp(self):
+        """Import the module."""
+        from pob_farming_strategies import (
+            build_strategies, get_farming_strategies, get_farming_recommendation,
+            FarmingMethod, Applicability, CurrencyType, CURRENT_LEAGUE,
+            check_applicability, verify_strategy, sort_strategies_by_priority,
+            DECISION_MATRIX_330, BUDGET_ALLOCATION_330
+        )
+        self.module = __import__('pob_farming_strategies')
+    
+    def test_league_constants(self):
+        """Test league constants are correct for 3.30."""
+        from pob_farming_strategies import CURRENT_LEAGUE, CURRENT_LEAGUE_NAME, CURRENT_LEAGUE_MECHANIC
+        self.assertEqual(CURRENT_LEAGUE, "3.30")
+        self.assertEqual(CURRENT_LEAGUE_NAME, "Covens of Umbra")
+        self.assertEqual(CURRENT_LEAGUE_MECHANIC, "Wickerman/Fate")
+    
+    def test_league_aliases(self):
+        """Test league aliases include 3.30 terms."""
+        from pob_farming_strategies import LEAGUE_ALIASES
+        aliases_330 = LEAGUE_ALIASES.get("3.30", [])
+        self.assertIn("Covens of Umbra", aliases_330)
+        self.assertIn("Wickerman", aliases_330)
+        self.assertIn("Viscera", aliases_330)
+        self.assertIn("Fate", aliases_330)
+    
+    def test_build_strategies_330(self):
+        """Test building strategies for 3.30."""
+        from pob_farming_strategies import build_strategies
+        strategies = build_strategies("3.30")
+        
+        # Core currency strategies should exist
+        self.assertIn("divine_orbs", strategies)
+        self.assertIn("exalted_orbs", strategies)
+        self.assertIn("chaos_orbs", strategies)
+        
+        # 3.30 specific strategies
+        self.assertIn("covens_of_umbra", strategies)
+        self.assertIn("threads_farming", strategies)
+        self.assertIn("shaped_regions", strategies)
+        self.assertIn("mirage_core", strategies)
+        
+        # Kingsmarch should be verified for 3.30
+        self.assertIn("kingsmarch_daily", strategies)
+        ks = strategies["kingsmarch_daily"]
+        self.assertEqual(ks.applicability, self.module.Applicability.VERIFIED)
+    
+    def test_scarabs_removed_330(self):
+        """Test scarab farming is obsolete in 3.30."""
+        from pob_farming_strategies import build_strategies, Applicability
+        strategies = build_strategies("3.30")
+        
+        # Scarab farming should NOT be in 3.30 strategies (or be obsolete)
+        # The module doesn't include scarab_farming for 3.30
+        self.assertNotIn("scarab_farming", strategies)
+    
+    def test_threads_farming_returns(self):
+        """Test Thread farming strategy has 10 thread types."""
+        from pob_farming_strategies import build_strategies
+        strategies = build_strategies("3.30")
+        
+        threads_strat = strategies["threads_farming"]
+        thread_returns = threads_strat.estimated_returns.threads_per_hour
+        
+        # Should have all 10 thread types
+        expected_threads = [
+            "Abyss", "Bestiary", "Betrayal", "Blight", "Breach",
+            "Expedition", "Incursion", "Legion", "Ritual", "Ultimatum"
+        ]
+        for thread in expected_threads:
+            self.assertIn(thread, thread_returns)
+        
+        # Should have Frayed Thread
+        self.assertIn("Frayed Thread", thread_returns)
+    
+    def test_covens_of_umbra_strategy(self):
+        """Test Covens of Umbra strategy has Viscera returns."""
+        from pob_farming_strategies import build_strategies
+        strategies = build_strategies("3.30")
+        
+        covens = strategies["covens_of_umbra"]
+        self.assertEqual(covens.method, self.module.FarmingMethod.COVENS_OF_UMBRA)
+        self.assertGreater(covens.estimated_returns.visera_per_hour, 0)
+        self.assertGreater(covens.estimated_returns.divine_per_hour, 0)
+    
+    def test_shaped_regions_scaling(self):
+        """Test Shaped Regions has scaling mechanic."""
+        from pob_farming_strategies import build_strategies
+        strategies = build_strategies("3.30")
+        
+        shaped = strategies["shaped_regions"]
+        self.assertEqual(shaped.method, self.module.FarmingMethod.SHAPED_REGIONS)
+        self.assertIn("scaling", shaped.estimated_returns.threads_per_hour)
+    
+    def test_mirage_core_added(self):
+        """Test Mirage is now core content."""
+        from pob_farming_strategies import build_strategies
+        strategies = build_strategies("3.30")
+        
+        mirage = strategies["mirage_core"]
+        self.assertEqual(mirage.method, self.module.FarmingMethod.MIRAGE)
+        self.assertEqual(mirage.applicability, self.module.Applicability.VERIFIED)
+    
+    def test_kingsmarch_daily_330(self):
+        """Test Kingsmarch daily is verified for 3.30."""
+        from pob_farming_strategies import build_strategies, Applicability
+        strategies = build_strategies("3.30")
+        
+        ks = strategies["kingsmarch_daily"]
+        self.assertEqual(ks.applicability, Applicability.VERIFIED)
+        self.assertGreaterEqual(ks.estimated_returns.divine_per_hour, 1.5)
+    
+    def test_removed_mechanics_obsolete(self):
+        """Test removed mechanics are marked obsolete."""
+        from pob_farming_strategies import build_strategies, Applicability, REMOVED_MECHANICS
+        strategies = build_strategies("3.30")
+        
+        # Check REMOVED_MECHANICS list includes scarab
+        self.assertIn("scarab", REMOVED_MECHANICS)
+        
+        # Check changed mechanics includes key ones
+        from pob_farming_strategies import CHANGED_MECHANICS
+        self.assertIn("delirium", CHANGED_MECHANICS)
+        self.assertIn("expedition", CHANGED_MECHANICS)
+        self.assertIn("shaped regions", CHANGED_MECHANICS)
+        self.assertIn("mirage", CHANGED_MECHANICS)
+    
+    def test_check_applicability(self):
+        """Test applicability checking function."""
+        from pob_farming_strategies import build_strategies, check_applicability, Applicability
+        
+        strategies = build_strategies("3.30")
+        
+        # Verified strategy
+        result = check_applicability(strategies["divine_orbs"], "3.30")
+        self.assertTrue(result["applicable"])
+        self.assertEqual(result["action"], "trust")
+        
+        # 3.30 new mechanic
+        result = check_applicability(strategies["covens_of_umbra"], "3.30")
+        self.assertEqual(result["action"], "prioritize")
+        
+        # Changed mechanic (expedition)
+        expedition_strat = strategies["expedition_logbooks"]
+        result = check_applicability(expedition_strat, "3.30")
+        self.assertEqual(result["action"], "verify")
+    
+    def test_verify_strategy(self):
+        """Test full strategy verification."""
+        from pob_farming_strategies import build_strategies, verify_strategy
+        
+        strategies = build_strategies("3.30")
+        
+        # Divine orbs should be recommended
+        result = verify_strategy(strategies["divine_orbs"], "3.30")
+        self.assertEqual(result["verdict"], "recommended")
+        self.assertGreaterEqual(result["confidence"], 0.75)
+        
+        # Expedition needs review
+        result = verify_strategy(strategies["expedition_logbooks"], "3.30")
+        self.assertIn(result["verdict"], ["verify_manually", "not_recommended"])
+    
+    def test_get_farming_strategies(self):
+        """Test get_farming_strategies API."""
+        from pob_farming_strategies import get_farming_strategies
+        
+        # Get strategies for Earthshatter items
+        result = get_farming_strategies(
+            ["Vaal Axe", "Royal Burgonet", "Mageblood", "Ashes of the Stars"],
+            league="3.30"
+        )
+        
+        # Should always include currency
+        self.assertIn("divine_orbs", result)
+        self.assertIn("exalted_orbs", result)
+        self.assertIn("chaos_orbs", result)
+        
+        # Should include item-specific (if confidence >= 0.5)
+        # Note: exact matches depend on item name matching
+    
+    def test_get_farming_recommendation(self):
+        """Test complete farming recommendation."""
+        from pob_farming_strategies import get_farming_recommendation
+        
+        rec = get_farming_recommendation(
+            ["Vaal Axe", "Mageblood"],
+            league="3.30",
+            budget_divine=100
+        )
+        
+        self.assertEqual(rec["league"], "3.30")
+        self.assertIn("primary_strategy", rec)
+        self.assertIn("currency_farming", rec)
+        self.assertIn("item_farming", rec)
+        self.assertIn("decision_matrix", rec)
+        self.assertIn("budget_allocation", rec)
+        
+        # 3.30 should have expanded decision matrix
+        self.assertIn("Farm it yourself (Covens)", rec["decision_matrix"])
+        self.assertIn("Farm it yourself (Threads)", rec["decision_matrix"])
+        self.assertIn("Farm it yourself (Mirage)", rec["decision_matrix"])
+    
+    def test_decision_matrix_330(self):
+        """Test 3.30 decision matrix has new entries."""
+        from pob_farming_strategies import DECISION_MATRIX_330
+        
+        self.assertIn("Farm it yourself (Covens)", DECISION_MATRIX_330)
+        self.assertIn("Farm it yourself (Threads)", DECISION_MATRIX_330)
+        self.assertIn("Farm it yourself (Mirage)", DECISION_MATRIX_330)
+        # Original entries should still exist
+        self.assertIn("Buy finished", DECISION_MATRIX_330)
+        self.assertIn("Craft from base", DECISION_MATRIX_330)
+    
+    def test_budget_allocation_330(self):
+        """Test 3.30 budget allocation for Earthshatter."""
+        from pob_farming_strategies import BUDGET_ALLOCATION_330
+        
+        # Key Earthshatter items should have budget entries
+        self.assertIn("ashes_of_the_stars", BUDGET_ALLOCATION_330)
+        self.assertIn("mageblood", BUDGET_ALLOCATION_330)
+        self.assertIn("circle_of_guilt", BUDGET_ALLOCATION_330)
+        self.assertIn("echoes_of_creation", BUDGET_ALLOCATION_330)
+        self.assertIn("weapon_1", BUDGET_ALLOCATION_330)
+        self.assertIn("body_armour", BUDGET_ALLOCATION_330)
+        
+        # Budget methods should be valid
+        for item, info in BUDGET_ALLOCATION_330.items():
+            self.assertIn("method", info)
+            self.assertIn(info["method"], [
+                "BUY_FINISHED", "FARM_CURRENCY_THEN_BUY", "TRADE_ONLY"
+            ])
+    
+    def test_sort_strategies_by_priority(self):
+        """Test strategy sorting."""
+        from pob_farming_strategies import build_strategies, sort_strategies_by_priority
+        
+        strategies = build_strategies("3.30")
+        sorted_strats = sort_strategies_by_priority(strategies)
+        
+        # Should be sorted by priority (lower = higher)
+        priorities = [s.priority for s in sorted_strats]
+        self.assertEqual(priorities, sorted(priorities))
+        
+        # First should be covens_of_umbra (priority 1)
+        self.assertEqual(sorted_strats[0].name, "Covens of Umbra - Fate Selection & Wickerman")
+    
+    def test_farming_method_enum(self):
+        """Test FarmingMethod enum has 3.30 methods."""
+        from pob_farming_strategies import FarmingMethod
+        
+        # New 3.30 methods
+        self.assertTrue(hasattr(FarmingMethod, "COVENS_OF_UMBRA"))
+        self.assertTrue(hasattr(FarmingMethod, "SHAPED_REGIONS"))
+        self.assertTrue(hasattr(FarmingMethod, "KINGSMARCH"))
+        self.assertTrue(hasattr(FarmingMethod, "MIRAGE"))
+        
+        # Traditional methods
+        self.assertTrue(hasattr(FarmingMethod, "MAP_FARMING"))
+        self.assertTrue(hasattr(FarmingMethod, "HEIST"))
+        self.assertTrue(hasattr(FarmingMethod, "DELIRIUM"))
+    
+    def test_applicability_enum(self):
+        """Test Applicability enum values."""
+        from pob_farming_strategies import Applicability
+        
+        self.assertEqual(Applicability.VERIFIED.value, "verified")
+        self.assertEqual(Applicability.NEEDS_REVIEW.value, "needs_review")
+        self.assertEqual(Applicability.OBSOLETE.value, "obsolete")
+    
+    def test_currency_type_enum(self):
+        """Test CurrencyType enum has 3.30 currencies."""
+        from pob_farming_strategies import CurrencyType
+        
+        self.assertTrue(hasattr(CurrencyType, "THREAD"))
+        self.assertTrue(hasattr(CurrencyType, "FRAYED_THREAD"))
+        self.assertTrue(hasattr(CurrencyType, "VISCERA"))
+        
+        # Traditional
+        self.assertTrue(hasattr(CurrencyType, "DIVINE"))
+        self.assertTrue(hasattr(CurrencyType, "EXALTED"))
+        self.assertTrue(hasattr(CurrencyType, "CHAOS"))
+
+
+# ============================================================
 # Update Manager Tests
 # ============================================================
 
@@ -1415,6 +1705,7 @@ def run_tests():
     suite.addTests(loader.loadTestsFromTestCase(TestDashboardJS))
     suite.addTests(loader.loadTestsFromTestCase(TestUpdateManager))
     suite.addTests(loader.loadTestsFromTestCase(TestLevelingTracker))
+    suite.addTests(loader.loadTestsFromTestCase(TestFarmingStrategies))
     
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

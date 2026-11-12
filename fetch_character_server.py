@@ -43,6 +43,20 @@ SERVER_PORT = 8080
 TOKEN_FILE = Path.home() / ".pob_pipeline" / "poe_tokens.json"
 CHARACTER_STATE_FILE = Path.home() / ".pob_pipeline" / "character_state.json"
 
+def load_env_file():
+    """Load environment variables from .env file (for Windows .env support)."""
+    env_path = Path(__file__).parent / ".env"
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    os.environ.setdefault(key.strip(), value.strip())
+
+# Load .env file early
+load_env_file()
+
 # Gist Sync config (from environment)
 GIST_ID = os.environ.get("GH_GIST_ID")
 GIST_TOKEN = os.environ.get("GH_TOKEN")

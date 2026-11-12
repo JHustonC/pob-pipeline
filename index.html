@@ -2,30 +2,395 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=/pob-pipeline/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting to PoB Pipeline...</title>
+    <title>PoB Pipeline - Leveling Assistant & Crafting Dashboard</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-               display: flex; align-items: center; justify-content: center; 
-               height: 100vh; margin: 0; background: #0d1117; color: #e6edf3; }
-        .redirect { text-align: center; }
-        a { color: #58a6ff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .spinner { border: 3px solid #30363d; border-top: 3px solid #58a6ff; 
-                   border-radius: 50%; width: 40px; height: 40px; 
-                   animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0d1117; --bg-secondary: #161b22; --bg-tertiary: #21262d;
+            --fg: #e6edf3; --fg-muted: #8b949e; --accent: #58a6ff;
+            --accent-hover: #79b8ff; --success: #3fb950; --warning: #d29922;
+            --danger: #f85149; --border: #30363d; --card-bg: #161b22;
+            --gem-str: #f85149; --gem-dex: #3fb950; --gem-int: #58a6ff;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+               background: var(--bg); color: var(--fg); min-height: 100vh; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 24px; }
+        header { display: flex; justify-content: space-between; align-items: center;
+                 margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        h1 { font-size: 28px; font-weight: 600;
+             background: linear-gradient(90deg, var(--accent), #a371f7);
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-controls { display: flex; gap: 12px; align-items: center; }
+        .status-badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-tracking { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .status-stopped { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--accent); color: var(--bg); }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--fg); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        @media (max-width: 1200px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+        .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card h2 svg { width: 20px; height: 20px; fill: var(--accent); }
+        .card.full-width { grid-column: 1 / -1; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--fg-muted); font-size: 14px; }
+        .stat-value { font-weight: 600; font-size: 14px; }
+        .zone-info { display: flex; flex-direction: column; gap: 12px; }
+        .zone-name { font-size: 24px; font-weight: 600; color: var(--accent); }
+        .zone-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--fg-muted); }
+        .zone-meta span { display: flex; align-items: center; gap: 6px; }
+        .lab-trial-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(163, 113, 247, 0.2); border: 1px solid #a371f7; border-radius: 8px; color: #a371f7; font-weight: 600; }
+        .lab-trial-badge.hidden { display: none; }
+        .gem-list { display: flex; flex-direction: column; gap: 12px; }
+        .gem-card { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border); }
+        .gem-card.current { border-color: var(--success); box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.3); }
+        .gem-icon { width: 48px; height: 48px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .gem-icon.str { border: 2px solid var(--gem-str); color: var(--gem-str); }
+        .gem-icon.dex { border: 2px solid var(--gem-dex); color: var(--gem-dex); }
+        .gem-icon.int { border: 2px solid var(--gem-int); color: var(--gem-int); }
+        .gem-info { flex: 1; }
+        .gem-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .gem-meta { display: flex; gap: 16px; font-size: 12px; color: var(--fg-muted); }
+        .gem-meta span { display: flex; align-items: center; gap: 4px; }
+        .gem-quest-info { font-size: 12px; color: var(--warning); margin-top: 8px; padding: 8px; background: rgba(210, 153, 34, 0.1); border-radius: 6px; }
+        .passive-node { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; }
+        .passive-node.current { border-color: var(--success); box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.3); }
+        .passive-node-type { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; flex-shrink: 0; }
+        .passive-node-type.normal { background: var(--bg); border: 2px solid var(--border); }
+        .passive-node-type.notable { background: rgba(210, 153, 34, 0.2); border: 2px solid var(--warning); color: var(--warning); }
+        .passive-node-type.keystone { background: rgba(163, 113, 247, 0.2); border: 2px solid #a371f7; color: #a371f7; }
+        .passive-node-type.mastery { background: rgba(88, 166, 255, 0.2); border: 2px solid var(--accent); color: var(--accent); }
+        .passive-node-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .passive-node-stats { font-size: 12px; color: var(--fg-muted); }
+        .milestone-card { border-color: #a371f7; background: rgba(163, 113, 247, 0.05); }
+        .milestone-card.hidden { display: none; }
+        .milestone-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .milestone-icon { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #a371f7, var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .milestone-title { font-size: 18px; font-weight: 600; }
+        .milestone-subtitle { font-size: 13px; color: var(--fg-muted); }
+        .milestone-actions { display: flex; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .quest-list { max-height: 300px; overflow-y: auto; }
+        .quest-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+        .quest-item.completed { opacity: 0.7; }
+        .quest-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--success); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--bg); flex-shrink: 0; }
+        .quest-icon.pending { background: var(--bg-tertiary); border: 2px solid var(--border); }
+        .log-feed { max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.6; }
+        .log-entry { padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; background: var(--bg-tertiary); border-left: 3px solid var(--border); }
+        .log-entry.zone { border-left-color: var(--accent); }
+        .log-entry.level { border-left-color: var(--success); }
+        .log-entry.quest { border-left-color: var(--warning); }
+        .log-entry.milestone { border-left-color: #a371f7; }
+        .log-time { color: var(--fg-muted); margin-right: 12px; }
+        .log-type { font-weight: 600; text-transform: uppercase; font-size: 10px; margin-right: 8px; }
+        .log-type.zone { color: var(--accent); }
+        .log-type.level { color: var(--success); }
+        .log-type.quest { color: var(--warning); }
+        .log-type.milestone { color: #a371f7; }
+        .lab-map-card { min-height: 400px; }
+        .lab-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .lab-difficulty { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .lab-difficulty.normal { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+        .lab-difficulty.cruel { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .lab-difficulty.merciless { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .lab-difficulty.uber { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+        .lab-map-container { position: relative; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; height: 300px; }
+        .lab-map-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+        .lab-room { position: absolute; border: 2px solid var(--accent); border-radius: 4px; background: rgba(88, 166, 255, 0.1); font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; overflow: hidden; white-space: nowrap; }
+        .lab-room.current { border-color: var(--success); background: rgba(63, 185, 80, 0.3); box-shadow: 0 0 8px rgba(63, 185, 80, 0.5); }
+        .lab-room.visited { border-color: var(--warning); background: rgba(210, 153, 34, 0.1); }
+        .lab-room.dangerous { border-color: var(--danger); background: rgba(248, 81, 73, 0.1); }
+        .lab-room.has-key { border-color: #a371f7; }
+        .lab-room.has-shrine { border-color: #a371f7; }
+        .lab-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--fg-muted); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+        .legend-color.current { border-color: var(--success); background: rgba(63, 185, 80, 0.3); }
+        .legend-color.visited { border-color: var(--warning); background: rgba(210, 153, 34, 0.1); }
+        .legend-color.dangerous { border-color: var(--danger); background: rgba(248, 81, 73, 0.1); }
+        .legend-color.normal { border-color: var(--accent); background: rgba(88, 166, 255, 0.1); }
+        .legend-color.key { border-color: #a371f7; background: rgba(163, 113, 247, 0.2); }
+        .legend-color.shrine { border-color: #a371f7; background: rgba(163, 113, 247, 0.2); }
+        .ascendency-card { min-height: 300px; }
+        .ascendency-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .ascendency-points { display: flex; align-items: center; gap: 8px; }
+        .ascendency-point { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--fg-muted); }
+        .ascendency-point.allocated { border-color: #a371f7; background: linear-gradient(135deg, #a371f7, var(--accent)); color: var(--bg); }
+        .ascendency-point.pending { border-color: var(--warning); background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .ascendency-next { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .ascendency-next.hidden { display: none; }
+        .ascendency-next-label { font-size: 12px; color: var(--fg-muted); text-transform: uppercase; margin-bottom: 8px; }
+        .ascendency-next-name { font-size: 16px; font-weight: 600; color: #a371f7; margin-bottom: 8px; }
+        .ascendency-next-stats { font-size: 12px; color: var(--fg-muted); margin-bottom: 12px; }
+        .ascendency-next-stats span { display: inline-block; background: var(--bg); padding: 2px 8px; border-radius: 4px; margin-right: 8px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .ascendency-next-location { font-size: 11px; color: var(--fg-muted); }
+        .crafting-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .crafting-stage { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .crafting-stage.completed { border-color: var(--success); background: rgba(63, 185, 80, 0.1); }
+        .crafting-stage-title { font-weight: 600; margin-bottom: 8px; color: var(--accent); }
+        .crafting-stage-items { font-size: 12px; color: var(--fg-muted); line-height: 1.6; }
     </style>
 </head>
 <body>
-    <div class="redirect">
-        <h1>🔄 Redirecting...</h1>
-        <div class="spinner"></div>
-        <p>If you are not redirected automatically, <a href="/pob-pipeline/">click here</a>.</p>
+    <div class="container">
+        <header>
+            <h1>PoB Pipeline - Leveling Assistant</h1>
+            <div class="header-controls">
+                <span class="status-badge status-stopped" id="trackingStatus">Ready</span>
+                <button class="btn btn-primary" id="fetchCharBtn">🔐 Fetch Character</button>
+            </div>
+        </header>
+        <div class="grid">
+            <!-- Character & Zone -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> Character & Zone</h2>
+                <div class="zone-info">
+                    <div class="zone-name" id="zoneName">Loading from Gist...</div>
+                    <div class="zone-meta">
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg> Act <span id="zoneAct">-</span></span>
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Level <span id="zoneLevel">-</span></span>
+                        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> <span id="charLevel">1</span></span>
+                    </div>
+                    <div class="lab-trial-badge hidden" id="labTrialBadge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Lab Trial in: <span id="labTrialZone">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Next Gem -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Next Gem</h2>
+                <div class="gem-list" id="gemList"><div style="text-align:center;color:var(--fg-muted);padding:20px;">Load character to see recommendations</div></div>
+            </div>
+            
+            <!-- Next Passive -->
+            <div class="card">
+                <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg> Next Passive Node</h2>
+                <div id="passiveNodes"><div style="text-align:center;color:var(--fg-muted);padding:20px;">Load character to see recommendations</div></div>
+            </div>
+            
+            <!-- Lab Map -->
+            <div class="card lab-map-card">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Lab Map</h2>
+                <div class="lab-map-header">
+                    <div class="lab-difficulty normal" id="labDifficulty">Loading...</div>
+                    <button class="btn btn-secondary" id="refreshLabBtn" style="font-size:12px;padding:6px 12px;">Refresh</button>
+                </div>
+                <div class="lab-map-container" id="labMapContainer" style="height:300px;display:flex;align-items:center;justify-content:center;color:var(--fg-muted);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg>
+                    <span style="margin-left:12px;">Loading lab map from Gist...</span>
+                </div>
+                <div class="lab-legend" id="labLegend">
+                    <div class="legend-item"><div class="legend-color current"></div><span>Current Room</span></div>
+                    <div class="legend-item"><div class="legend-color visited"></div><span>Visited</span></div>
+                    <div class="legend-item"><div class="legend-color normal"></div><span>Unexplored</span></div>
+                    <div class="legend-item"><div class="legend-color dangerous"></div><span>Dangerous</span></div>
+                    <div class="legend-item"><div class="legend-color key"></div><span>Key/Door</span></div>
+                    <div class="legend-item"><div class="legend-color shrine"></div><span>Shrine</span></div>
+                </div>
+            </div>
+            
+            <!-- Ascendency Choice -->
+            <div class="card ascendency-card">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Ascendency Choice</h2>
+                <div class="ascendency-header">
+                    <div class="ascendency-points" id="ascendencyPoints"></div>
+                    <span class="ascendency-next-label">Points: <span id="ascendencyPointCount">0</span>/8</span>
+                </div>
+                <div class="ascendency-next" id="ascendencyNext">
+                    <div class="ascendency-next-label">Next Ascendency Node</div>
+                    <div class="ascendency-next-name" id="nextAscendencyName">--</div>
+                    <div class="ascendency-next-stats" id="nextAscendencyStats"></div>
+                    <div class="ascendency-next-location" id="nextAscendencyLocation">--</div>
+                </div>
+                <div style="color:var(--fg-muted);font-size:13px;margin-top:16px;padding:12px;background:var(--bg-tertiary);border-radius:8px;border:1px solid var(--border);" id="ascendencyInfo">Complete Lab to unlock ascendency points. Normal=2, Cruel=2, Merciless=2, Uber=2.</div>
+            </div>
+            
+            <!-- Crafting Checklist -->
+            <div class="card full-width">
+                <h2><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Crafting Checklist</h2>
+                <div class="crafting-grid" id="craftingChecklist"></div>
+            </div>
+        </div>
     </div>
     <script>
-        window.location.href = '/pob-pipeline/';
+        // State
+        let characterState = { level: 1, ascendencyPoints: 0 };
+        const GIST_ID = 'YOUR_GIST_ID_HERE';
+        const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
+        
+        // DOM Elements
+        const elements = {
+            zoneName: document.getElementById('zoneName'),
+            zoneAct: document.getElementById('zoneAct'),
+            zoneLevel: document.getElementById('zoneLevel'),
+            charLevel: document.getElementById('charLevel'),
+            labTrialBadge: document.getElementById('labTrialBadge'),
+            labTrialZone: document.getElementById('labTrialZone'),
+            gemList: document.getElementById('gemList'),
+            passiveNodes: document.getElementById('passiveNodes'),
+            labDifficulty: document.getElementById('labDifficulty'),
+            labMapContainer: document.getElementById('labMapContainer'),
+            labLegend: document.getElementById('labLegend'),
+            refreshLabBtn: document.getElementById('refreshLabBtn'),
+            ascendencyPoints: document.getElementById('ascendencyPoints'),
+            ascendencyPointCount: document.getElementById('ascendencyPointCount'),
+            ascendencyNext: document.getElementById('ascendencyNext'),
+            nextAscendencyName: document.getElementById('nextAscendencyName'),
+            nextAscendencyStats: document.getElementById('nextAscendencyStats'),
+            nextAscendencyLocation: document.getElementById('nextAscendencyLocation'),
+            ascendencyInfo: document.getElementById('ascendencyInfo'),
+            ascendencyPointsContainer: document.getElementById('ascendencyPoints'),
+            fetchCharBtn: document.getElementById('fetchCharBtn'),
+        };
+        
+        // Load from Gist
+        async function loadFromGist() {
+            try {
+                const response = await fetch(GIST_URL);
+                if (!response.ok) throw new Error('Gist not found');
+                const gist = await response.json();
+                const content = gist.files['character_state.json']?.content || '{}';
+                characterState = JSON.parse(content);
+                updateUI();
+                await loadLabMap();
+            } catch (e) {
+                console.log('Gist load failed:', e);
+            }
+        }
+        
+        function updateUI() {
+            const { level, ascendencyPoints, zoneName, zoneAct, zoneLevel, labTrialZone } = characterState;
+            document.getElementById('charLevel').textContent = level || 1;
+            document.getElementById('zoneName').textContent = zoneName || 'Unknown';
+            document.getElementById('zoneAct').textContent = zoneAct || '-';
+            document.getElementById('zoneLevel').textContent = zoneLevel || '-';
+            if (labTrialZone) {
+                document.getElementById('labTrialZone').textContent = labTrialZone;
+                document.getElementById('labTrialBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('labTrialBadge').classList.add('hidden');
+            }
+            renderAscendencyChoice();
+            updateGemRecommendations();
+            updatePassiveRecommendations();
+        }
+        
+        function renderAscendencyChoice() {
+            const points = characterState.ascendencyPoints || 0;
+            document.getElementById('ascendencyPointCount').textContent = points;
+            const container = document.getElementById('ascendencyPoints');
+            container.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const div = document.createElement('div');
+                div.className = 'ascendency-point';
+                div.textContent = i + 1;
+                if (i < points) div.classList.add('allocated');
+                else if (i === points) div.classList.add('pending');
+                container.appendChild(div);
+            }
+            const nodes = [
+                {name:'Crave the Slaughter',type:'notable',stats:['+20% Attack Speed']},
+                {name:'War Bringer',type:'notable',stats:['Warcry 10 min Power','+20% Warcry Speed']},
+                {name:'Defy Pain',type:'notable',stats:['+10% Phys Dmg Red','+20% Armour']},
+                {name:'Rage Mastery',type:'mastery',stats:['+10 Max Rage','Rage decay 3s delay']},
+                {name:'Bastion Breaker',type:'notable',stats:['100% Overwhelm Phys Red']}
+            ];
+            const nextIdx = points;
+            if (nextIdx < 5) {
+                const n = [{name:'Crave the Slaughter',type:'notable',stats:['+20% Attack Speed']},
+                    {name:'War Bringer',type:'notable',stats:['Warcry 10 min Power','+20% Warcry Speed']},
+                    {name:'Defy Pain',type:'notable',stats:['+10% Phys Dmg Red','+20% Armour']},
+                    {name:'Rage Mastery',type:'mastery',stats:['+10 Max Rage','Rage decay 3s delay']},
+                    {name:'Bastion Breaker',type:'notable',stats:['100% Overwhelm Phys Red']}][nextIdx];
+                document.getElementById('nextAscendencyName').textContent = n.name;
+                document.getElementById('nextAscendencyStats').innerHTML = n.stats.map(s=>`<span>${s}</span>`).join('');
+                document.getElementById('nextAscendencyLocation').textContent = `Node ${nextIdx+1}/5 • ${n.type.charAt(0).toUpperCase()+n.type.slice(1)}`;
+                document.getElementById('ascendencyNext').classList.remove('hidden');
+            } else {
+                document.getElementById('ascendencyNext').classList.add('hidden');
+                document.getElementById('nextAscendencyName').textContent = 'All allocated!';
+            }
+        }
+        
+        function updateGemRecommendations() {
+            const level = characterState.level || 1;
+            const gems = [
+                {lvl:1, name:'Earthshatter',attr:1,q:''},{lvl:1, name:'Lifetap Support',attr:1,q:'the_caged_brute1'},
+                {lvl:4, name:'Melee Phys Damage',attr:1,q:''},{lvl:4, name:'Pulverise',attr:1,q:'the_caged_brute2'},
+                {lvl:8, name:'Brutality',attr:1,q:''},{lvl:8, name:'Added Fire',attr:1,q:'the_caged_brute1'},
+                {lvl:12, name:'Overexertion',attr:1,q:'a_fixture_of_fate'},
+                {lvl:16, name:"Battlemage's Cry",attr:1,q:'intruders_in_black'},
+                {lvl:24, name:'Pride',attr:1,q:'lost_in_love'},{lvl:24, name:'Autoexertion',attr:1,q:'lost_in_love'},
+                {lvl:28, name:'Impending Doom',attr:3,q:'sever_the_right_hand'},
+                {lvl:38, name:'Circle of Guilt',attr:2,q:'sever_the_right_hand'}
+            ];
+            const available = gems.filter(g=>g.lvl<=level).slice(-3);
+            const attrNames={1:'STR',2:'DEX',3:'INT'}, attrColors={1:'gem-str',2:'gem-dex',3:'gem-int'};
+            document.getElementById('gemList').innerHTML = available.map((g,i)=>`<div class="gem-card ${i===available.length-1?'current':''}"><div class="gem-icon ${attrColors[g.attr]}">${attrNames[g.attr]}</div><div class="gem-info"><div class="gem-name">${g.name}</div><div class="gem-meta"><span>Level ${g.lvl}</span><span>${attrNames[g.attr]}</span></div>${g.q?`<div class="gem-quest-info">Quest: ${g.q.replace(/_/g,' ')}</div>`:''}</div>`).join('');
+        }
+        
+        function updatePassiveRecommendations() {
+            const level = characterState.level || 1;
+            const nodes=[{name:'Marauder Start',type:'normal',stats:['+10 Str']},{name:'Life Node',type:'normal',stats:['+5% Life']},{name:'Armour Mastery',type:'mastery',stats:['+1% Max Res']},{name:'Warcry Effect',type:'notable',stats:['20% Warcry Buff Effect']},{name:'Rage Mastery',type:'mastery',stats:['+10 Rage']}];
+            const show=nodes.slice(0,Math.min(2,Math.floor(level/10)+1));
+            document.getElementById('passiveNodes').innerHTML=show.map((n,i)=>`<div class="passive-node ${i===0?'current':''}"><div class="passive-node-type ${n.type}">${n.type.charAt(0).toUpperCase()}</div><div class="passive-node-info"><div class="passive-node-name">${n.name}</div><div class="passive-node-stats">${n.stats.join(', ')}</div></div>`).join('');
+        }
+        
+        // Lab Map
+        const LAB_DIFFICULTIES = [
+            {key:'normal',name:'Normal Lab',points:2,slug:'aw4nd',color:'normal'},
+            {key:'cruel',name:'Cruel Lab',points:4,slug:'15vjj',color:'cruel'},
+            {key:'merciless',name:'Merciless Lab',points:6,slug:'6e0zx',color:'merciless'},
+            {key:'uber',name:'Uber Lab',points:8,slug:'s52bd',color:'uber'}
+        ];
+        function getLabForPoints(p){ if(p>=6)return LAB_DIFFICULTIES[3]; if(p>=4)return LAB_DIFFICULTIES[2]; if(p>=2)return LAB_DIFFICULTIES[1]; return LAB_DIFFICULTIES[0]; }
+        
+        async function loadLabMap() {
+            const lab = getLabForPoints(characterState.ascendencyPoints||0);
+            document.getElementById('labDifficulty').textContent = lab.name;
+            document.getElementById('labDifficulty').className = `lab-difficulty ${lab.color}`;
+            document.getElementById('labMapContainer').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--fg-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg><span style="margin-left:12px;">Loading ${lab.name} map...</span></div>`;
+            try {
+                const notesUrl = `https://www.poelab.com/${lab.slug}/`;
+                const resp = await fetch(notesUrl);
+                const html = await resp.text();
+                const match = html.match(/href="(https:\/\/www\.poelab\.com\/wp-content\/labfiles\/[^"]+\.json)"/);
+                if(!match) throw new Error('No JSON link');
+                const jsonResp = await fetch(match[1]);
+                const layout = await jsonResp.json();
+                renderLabMap(layout, lab);
+            } catch(e) {
+                console.error(e);
+                document.getElementById('labMapContainer').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--danger);">Failed: '+e.message+'</div>';
+            }
+        }
+        
+        function renderLabMap(layout, lab) {
+            if(!layout.rooms){ document.getElementById('labMapContainer').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--fg-muted);">Invalid layout</div>'; return; }
+            document.getElementById('labDifficulty').textContent = lab.name;
+            document.getElementById('labDifficulty').className = `lab-difficulty ${lab.color}`;
+            const rooms = layout.rooms||[];
+            let minX=1/0,maxX=-1/0,minY=1/0,maxY=-1/0;
+            rooms.forEach(r=>{const x=parseFloat(r.x),y=parseFloat(r.y);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);});
+            const pad=50,w=maxX-minX+pad*2,h=maxY-minY+pad*2;
+            let html='';
+            const currentZone = characterState.zoneName||'';
+            rooms.forEach(r=>{if(r.name.toLowerCase().includes(currentZone.toLowerCase())||currentZone.toLowerCase().includes(r.name.toLowerCase())) currentRoomId=r.id;});
+            rooms.forEach(r=>{const x=parseFloat(r.x),y=parseFloat(r.y),left=((x-minX+pad)/w)*100,top=((y-minY+pad)/h)*100,exits=Object.keys(r.exits||{}).length,size=Math.max(12,Math.min(25,10+exits*3)),cls='lab-room'+(r.id===currentRoomId?' current':'')+(r.dangerous==='true'?' dangerous':'')+(r.contents&&r.contents.some(c=>c.toLowerCase().includes('key')||c.toLowerCase().includes('door'))?' has-key':'')+(r.contents&&r.contents.some(c=>c.toLowerCase().includes('shrine'))?' has-shrine':'');html+=`<div class="${cls}" style="left:${left}%;top:${top}%;width:${size}px;height:${size}px;" title="${r.name}: ${r.contents?.join(', ')||'—'}">${r.name}</div>`;});
+            let conn='';rooms.forEach(r=>{const x1=((parseFloat(r.x)-minX+pad)/w)*100,y1=((parseFloat(r.y)-minY+pad)/h)*100;Object.entries(r.exits||{}).forEach(([d,t])=>{const tr=rooms.find(x=>x.id===t);if(tr){const x2=((parseFloat(tr.x)-minX+pad)/w)*100,y2=((parseFloat(tr.y)-minY+pad)/h)*100;conn+=`<svg class="lab-conn" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0;"><line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.5"/></svg>`;});});
+            document.getElementById('labMapContainer').innerHTML=`<div class="lab-map-overlay" style="position:relative;width:100%;height:300px;">${conn}${html}</div>`;
+        }
+        document.getElementById('refreshLabBtn')?.addEventListener('click',loadLabMap);
+        
+        // Init
+        async function init() {
+            await loadFromGist();
+            document.getElementById('fetchCharBtn')?.addEventListener('click',()=>{alert('Run fetch_character_server.py on your gaming machine to sync character to Gist');});
+        }
+        document.addEventListener('DOMContentLoaded',init);
     </script>
 </body>
 </html>

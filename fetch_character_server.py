@@ -261,8 +261,11 @@ class FetchCharacterHandler(BaseHTTPRequestHandler):
             self.send_error(404)
     
     def serve_dashboard(self):
-        """Serve the crafting checklist dashboard with fetch character integration."""
-        dashboard_path = Path(__file__).parent / "crafting_checklist.html"
+        """Serve the full leveling dashboard with fetch character integration."""
+        dashboard_path = Path(__file__).parent / "pob_leveling_dashboard.html"
+        if not dashboard_path.exists():
+            # Fallback to index.html if leveling dashboard doesn't exist
+            dashboard_path = Path(__file__).parent / "index.html"
         if dashboard_path.exists():
             with open(dashboard_path) as f:
                 content = f.read()

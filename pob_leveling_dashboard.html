@@ -345,6 +345,219 @@
             border-top: 1px solid var(--border);
         }
         
+        /* Lab Map */
+        .lab-map-card {
+            min-height: 400px;
+        }
+        
+        .lab-map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .lab-difficulty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .lab-difficulty.normal { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+        .lab-difficulty.cruel { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .lab-difficulty.merciless { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .lab-difficulty.uber { background: rgba(163, 113, 247, 0.2); color: #a371f7; }
+        
+        .lab-map-container {
+            position: relative;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .lab-map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .lab-map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .lab-room {
+            position: absolute;
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            background: rgba(88, 166, 255, 0.1);
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .lab-room.current {
+            border-color: var(--success);
+            background: rgba(63, 185, 80, 0.3);
+            box-shadow: 0 0 8px rgba(63, 185, 80, 0.5);
+        }
+        
+        .lab-room.visited {
+            border-color: var(--warning);
+            background: rgba(210, 153, 34, 0.1);
+        }
+        
+        .lab-room.dangerous {
+            border-color: var(--danger);
+            background: rgba(248, 81, 73, 0.1);
+        }
+        
+        .lab-room.has-key {
+            border-color: #a371f7;
+        }
+        
+        .lab-room.has-shrine {
+            border-color: #a371f7;
+        }
+        
+        .lab-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--fg-muted);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 2px solid;
+        }
+        
+        .legend-color.current { border-color: var(--success); background: rgba(63, 185, 80, 0.3); }
+        .legend-color.visited { border-color: var(--warning); background: rgba(210, 153, 34, 0.1); }
+        .legend-color.dangerous { border-color: var(--danger); background: rgba(248, 81, 73, 0.1); }
+        .legend-color.normal { border-color: var(--accent); background: rgba(88, 166, 255, 0.1); }
+        .legend-color.key { border-color: #a371f7; background: rgba(163, 113, 247, 0.2); }
+        .legend-color.shrine { border-color: #a371f7; background: rgba(163, 113, 247, 0.2); }
+        
+        /* Ascendency Choice */
+        .ascendency-card {
+            min-height: 300px;
+        }
+        
+        .ascendency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ascendency-points {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ascendency-point {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg-muted);
+        }
+        
+        .ascendency-point.allocated {
+            border-color: #a371f7;
+            background: linear-gradient(135deg, #a371f7, var(--accent));
+            color: var(--bg);
+        }
+        
+        .ascendency-point.pending {
+            border-color: var(--warning);
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--warning);
+        }
+        
+        .ascendency-next {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .ascendency-next.hidden { display: none; }
+        
+        .ascendency-next-label {
+            font-size: 12px;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .ascendency-next-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #a371f7;
+            margin-bottom: 8px;
+        }
+        
+        .ascendency-next-stats {
+            font-size: 12px;
+            color: var(--fg-muted);
+            margin-bottom: 12px;
+        }
+        
+        .ascendency-next-stats span {
+            display: inline-block;
+            background: var(--bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .ascendency-next-location {
+            font-size: 11px;
+            color: var(--fg-muted);
+        }
+        
         /* Quest List */
         .quest-list {
             max-height: 300px;
@@ -553,6 +766,55 @@
                 </div>
             </div>
             
+            <!-- Lab Map -->
+            <div class="card lab-map-card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                    Lab Map
+                </h2>
+                <div class="lab-map-header">
+                    <div class="lab-difficulty normal" id="labDifficulty">Normal Lab</div>
+                    <button class="btn btn-secondary" id="refreshLabBtn" style="font-size: 12px; padding: 6px 12px;">Refresh</button>
+                </div>
+                <div class="lab-map-container" id="labMapContainer">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: var(--fg-muted);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg>
+                        <span style="margin-left: 12px;">Loading lab map...</span>
+                    </div>
+                </div>
+                <div class="lab-legend" id="labLegend">
+                    <div class="legend-item"><div class="legend-color current"></div><span>Current Room</div></div>
+                    <div class="legend-item"><div class="legend-color visited"></div><span>Visited</div></div>
+                    <div class="legend-item"><div class="legend-color normal"></div><span>Unexplored</div></div>
+                    <div class="legend-item"><div class="legend-color dangerous"></div><span>Dangerous</div></div>
+                    <div class="legend-item"><div class="legend-color key"></div><span>Key/Door</div></div>
+                    <div class="legend-item"><div class="legend-color shrine"></div><span>Shrine</div></div>
+                </div>
+            </div>
+            
+            <!-- Ascendency Choice -->
+            <div class="card ascendency-card">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Ascendency Choice
+                </h2>
+                <div class="ascendency-header">
+                    <div class="ascendency-points" id="ascendencyPoints"></div>
+                    <span class="ascendency-next-label">Points: <span id="ascendencyPointCount">0</span>/8</span>
+                </div>
+                <div class="ascendency-next" id="ascendencyNext">
+                    <div class="ascendency-next-label">Next Ascendency Node</div>
+                    <div class="ascendency-next-name" id="nextAscendencyName">--</div>
+                    <div class="ascendency-next-stats" id="nextAscendencyStats"></div>
+                    <div class="ascendency-next-location" id="nextAscendencyLocation">--</div>
+                </div>
+                <div style="color: var(--fg-muted); font-size: 13px; margin-top: 16px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border);" id="ascendencyInfo">
+                    Complete the Lab to unlock ascendency points. Normal Lab = 2 points, Cruel = 2 points, Merciless = 2 points, Uber = 2 points.
+                </div>
+            </div>
+            
+            <!-- Quest Progress -->
+            
             <!-- Event Log -->
             <div class="card full-width">
                 <h2>
@@ -661,13 +923,29 @@
             settingLeague: document.getElementById('settingLeague'),
             settingClass: document.getElementById('settingClass'),
             settingAscendancy: document.getElementById('settingAscendancy'),
-            settingAutoStart: document.getElementById('settingAutoStart')
+            settingAutoStart: document.getElementById('settingAutoStart'),
+            // Lab & Ascendency
+            labDifficulty: document.getElementById('labDifficulty'),
+            labMapContainer: document.getElementById('labMapContainer'),
+            labLegend: document.getElementById('labLegend'),
+            refreshLabBtn: document.getElementById('refreshLabBtn'),
+            ascendencyPoints: document.getElementById('ascendencyPoints'),
+            ascendencyPointCount: document.getElementById('ascendencyPointCount'),
+            ascendencyNext: document.getElementById('ascendencyNext'),
+            nextAscendencyName: document.getElementById('nextAscendencyName'),
+            nextAscendencyStats: document.getElementById('nextAscendencyStats'),
+            nextAscendencyLocation: document.getElementById('nextAscendencyLocation'),
+            ascendencyInfo: document.getElementById('ascendencyInfo'),
+            ascendencyPointsContainer: document.getElementById('ascendencyPoints')
         };
         
         // Initialize
         function init() {
             loadSettings();
             setupEventListeners();
+            
+            // Initialize lab map and ascendency choice
+            initLabAndAscendency();
             
             if (settings.autoStart) {
                 startTracking();
@@ -842,11 +1120,13 @@
         }
         
         function updateLevel(level) {
+            state.level = level;
             elements.charLevel.textContent = level;
             
             // Update gem recommendations based on level
             updateGemRecommendations(level);
             updatePassiveRecommendations(level);
+            updateAscendencyDisplay(); // Update ascendency when level changes
         }
         
         function updateGemRecommendations(level) {
@@ -990,6 +1270,286 @@
             // Keep only last 50 entries
             while (elements.logFeed.children.length > 50) {
                 elements.logFeed.removeChild(elements.logFeed.lastChild);
+            }
+        }
+        
+        // ===== LAB MAP FUNCTIONS =====
+        
+        // Lab difficulty URLs on poelab.com
+        const LAB_DIFFICULTIES = [
+            { key: 'normal', name: 'Normal Lab', points: 2, slug: 'aw4nd', colorClass: 'normal', baseUrl: 'https://www.poelab.com/wp-content/labfiles/normal-' },
+            { key: 'cruel', name: 'Cruel Lab', points: 4, slug: '15vjj', colorClass: 'cruel', baseUrl: 'https://www.poelab.com/wp-content/labfiles/cruel-' },
+            { key: 'merciless', name: 'Merciless Lab', points: 6, slug: '6e0zx', colorClass: 'merciless', baseUrl: 'https://www.poelab.com/wp-content/labfiles/merciless-' },
+            { key: 'uber', name: 'Uber Lab', points: 8, slug: 's52bd', colorClass: 'uber', baseUrl: 'https://www.poelab.com/wp-content/labfiles/uber-' }
+        ];
+        
+        // Determine which lab to show based on ascendency points
+        function getLabForAscendencyPoints(points) {
+            if (points >= 6) return LAB_DIFFICULTIES[3]; // Uber
+            if (points >= 4) return LAB_DIFFICULTIES[2]; // Merciless
+            if (points >= 2) return LAB_DIFFICULTIES[1]; // Cruel
+            return LAB_DIFFICULTIES[0]; // Normal
+        }
+        
+        // Fetch the daily lab layout JSON from poelab.com
+        async function fetchLabLayout(lab) {
+            try {
+                // First, fetch the daily notes page to get the current lab compass file URL
+                const notesUrl = `https://www.poelab.com/${lab.slug}/`;
+                const response = await fetch(notesUrl);
+                const html = await response.text();
+                
+                // Extract the lab compass file URL from the page
+                const match = html.match(/href="(https:\/\/www\.poelab\.com\/wp-content\/labfiles\/[^"]+\.json)"/);
+                if (!match) {
+                    throw new Error('Could not find lab compass file link');
+                }
+                
+                const jsonUrl = match[1];
+                const jsonResponse = await fetch(jsonUrl);
+                if (!jsonResponse.ok) {
+                    throw new Error(`Failed to fetch lab layout: ${jsonResponse.status}`);
+                }
+                
+                const layout = await jsonResponse.json();
+                return layout;
+            } catch (error) {
+                console.error('Failed to fetch lab layout:', error);
+                throw error;
+            }
+        }
+        
+        // Render the lab map from layout data
+        function renderLabMap(layout, lab) {
+            if (!layout || !layout.rooms) {
+                elements.labMapContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: var(--fg-muted);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span style="margin-left: 12px;">Failed to load lab map</span>
+                `;
+                return;
+            }
+            
+            // Update difficulty badge
+            elements.labDifficulty.textContent = lab.name;
+            elements.labDifficulty.className = `lab-difficulty ${lab.colorClass}`;
+            
+            // Calculate bounds for scaling
+            const rooms = layout.rooms || [];
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            rooms.forEach(room => {
+                const x = parseFloat(room.x);
+                const y = parseFloat(room.y);
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            });
+            
+            // Add padding
+            const padding = 50;
+            const width = maxX - minX + padding * 2;
+            const height = maxY - minY + padding * 2;
+            
+            // Container size
+            const containerWidth = 100; // percentage
+            const containerHeight = 300; // pixels
+            
+            // Scale factors
+            const scaleX = containerWidth / (width / 100); // containerWidth is %, so we use viewport width
+            const scaleY = containerHeight / height;
+            
+            // Build room elements
+            let roomsHtml = '';
+            let currentRoomId = null;
+            
+            // Determine current room based on current zone
+            const currentZone = elements.zoneName?.textContent || '';
+            rooms.forEach(room => {
+                if (room.name.toLowerCase().includes(currentZone.toLowerCase()) || 
+                    currentZone.toLowerCase().includes(room.name.toLowerCase())) {
+                    currentRoomId = room.id;
+                }
+            });
+            
+            rooms.forEach(room => {
+                const x = parseFloat(room.x);
+                const y = parseFloat(room.y);
+                
+                // Scale to container
+                const left = ((x - minX + padding) / width) * 100;
+                const top = ((y - minY + padding) / height) * 100;
+                
+                // Room size based on connections
+                const exitCount = Object.keys(room.exits || {}).length;
+                const size = Math.max(12, Math.min(25, 10 + exitCount * 3));
+                
+                // Determine room classes
+                let classes = 'lab-room';
+                if (room.id === currentRoomId) classes += ' current';
+                if (room.dangerous === 'true') classes += ' dangerous';
+                if (room.contents && room.contents.some(c => c.toLowerCase().includes('key') || c.toLowerCase().includes('door'))) classes += ' has-key';
+                if (room.contents && room.contents.some(c => c.toLowerCase().includes('shrine'))) classes += ' has-shrine';
+                
+                // Content text
+                const contents = room.contents && room.contents.length > 0 ? room.contents.join(', ') : '—';
+                
+                roomsHtml += `
+                    <div class="${classes}" style="left: ${left}%; top: ${top}%; width: ${size}px; height: ${size}px;" title="${room.name}: ${contents}">
+                        ${room.name}
+                    </div>
+                `;
+            });
+            
+            // Draw connections
+            let connectionsHtml = '';
+            rooms.forEach(room => {
+                const x1 = ((parseFloat(room.x) - minX + padding) / width) * 100;
+                const y1 = ((parseFloat(room.y) - minY + padding) / height) * 100;
+                
+                Object.entries(room.exits || {}).forEach(([dir, targetId]) => {
+                    const targetRoom = rooms.find(r => r.id === targetId);
+                    if (!targetRoom) return;
+                    
+                    const x2 = ((parseFloat(targetRoom.x) - minX + padding) / width) * 100;
+                    const y2 = ((parseFloat(targetRoom.y) - minY + padding) / height) * 100;
+                    
+                    // Draw SVG line
+                    connectionsHtml += `
+                        <svg class="lab-connection" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+                            <line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.5"/>
+                        </svg>
+                    `;
+                });
+            });
+            
+            elements.labMapContainer.innerHTML = `
+                <div class="lab-map-overlay" style="position: relative; width: 100%; height: 300px;">
+                    ${connectionsHtml}
+                    ${roomsHtml}
+                </div>
+                <div class="lab-legend" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--fg-muted);">
+                    <div class="legend-item"><div class="legend-color current"></div><span>Current Room</span></div>
+                    <div class="legend-item"><div class="legend-color visited"></div><span>Visited</span></div>
+                    <div class="legend-item"><div class="legend-color normal"></div><span>Unexplored</span></div>
+                    <div class="legend-item"><div class="legend-color dangerous"></div><span>Dangerous</span></div>
+                    <div class="legend-item"><div class="legend-color key"></span><span>Key/Door</span></div>
+                    <div class="legend-item"><div class="legend-color shrine"></span><span>Shrine</span></div>
+                </div>
+            `;
+        }
+        
+        // Load and display the appropriate lab map
+        async function loadLabMap() {
+            try {
+                // Get ascendency points from state (or settings)
+                const ascendencyPoints = getAscendencyPoints();
+                const lab = getLabForAscendencyPoints(ascendencyPoints);
+                
+                // Update UI immediately
+                elements.labDifficulty.textContent = lab.name;
+                elements.labDifficulty.className = `lab-difficulty ${lab.colorClass}`;
+                elements.labMapContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: var(--fg-muted);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg>
+                        <span style="margin-left: 12px;">Loading ${lab.name} map...</span>
+                    </div>
+                `;
+                
+                // Fetch and render
+                const layout = await fetchLabLayout(lab);
+                renderLabMap(layout, lab);
+                
+            } catch (error) {
+                console.error('Failed to load lab map:', error);
+                elements.labMapContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: var(--danger);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+                        <span style="margin-left: 12px;">Failed to load lab map: ${error.message}</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Get ascendency points from character state
+        function getAscendencyPoints() {
+                    // Try to get from character data if available
+                    if (state.character_data && state.ascendencyPoints !== undefined) {
+                        return state.ascendencyPoints;
+                    }
+                    // Fallback: estimate from level
+                    const level = state.level || 1;
+                    if (level >= 75) return 8; // Uber
+                    if (level >= 60) return 6; // Merciless
+                    if (level >= 40) return 4; // Cruel
+                    if (level >= 20) return 2; // Normal
+                    return 0;
+                }
+        
+        // ===== ASCENDENCY CHOICE FUNCTIONS =====
+        
+        // Ascendency nodes for Berserker (from target build)
+        const BERSERKER_ASCENDENCY_NODES = [
+            { id: 'crave_the_slaughter', name: 'Crave the Slaughter', type: 'notable', stats: ['+20% Attack Speed'], connected: ['war_bringer'] },
+            { id: 'war_bringer', name: 'War Bringer', type: 'notable', stats: ['Warcry Skills have 10 min Power', '+20% Warcry Speed'], connected: ['defy_pain', 'rage_mastery'] },
+            { id: 'defy_pain', name: 'Defy Pain', type: 'notable', stats: ['+10% Physical Damage Reduction', '+20% Armour'], connected: ['rage_mastery'] },
+            { id: 'rage_mastery', name: 'Rage Mastery', type: 'mastery', stats: ['+10 Maximum Rage', 'Rage does not decay for 3 seconds after losing it'], connected: ['war_bringer', 'defy_pain', 'bastion_breaker'] },
+            { id: 'bastion_breaker', name: 'Bastion Breaker', type: 'notable', stats: ['100% Overwhelm Physical Damage Reduction'], connected: ['rage_mastery'] }
+        ];
+        
+        // Render ascendency points and next choice
+        function renderAscendencyChoice() {
+            const ascendencyPoints = getAscendencyPoints();
+            const maxPoints = 8;
+            
+            // Update point count
+            elements.ascendencyPointCount.textContent = ascendencyPoints;
+            
+            // Render points
+            elements.ascendencyPointsContainer.innerHTML = '';
+            for (let i = 0; i < maxPoints; i++) {
+                const point = document.createElement('div');
+                point.className = 'ascendency-point';
+                point.textContent = i + 1;
+                
+                if (i < ascendencyPoints) {
+                    point.classList.add('allocated');
+                } else if (i === ascendencyPoints) {
+                    point.classList.add('pending');
+                }
+                
+                elements.ascendencyPointsContainer.appendChild(point);
+            }
+            
+            // Determine next ascendency node
+            const nextNodeIndex = ascendencyPoints;
+            if (nextNodeIndex < BERSERKER_ASCENDENCY_NODES.length) {
+                const nextNode = BERSERKER_ASCENDENCY_NODES[nextNodeIndex];
+                elements.nextAscendencyName.textContent = nextNode.name;
+                elements.nextAscendencyStats.innerHTML = nextNode.stats.map(s => `<span>${s}</span>`).join('');
+                elements.nextAscendencyLocation.textContent = `Node ${nextNodeIndex + 1} of ${BERSERKER_ASCENDENCY_NODES.length} • ${nextNode.type.charAt(0).toUpperCase() + nextNode.type.slice(1)}`;
+                elements.ascendencyNext.classList.remove('hidden');
+            } else {
+                elements.ascendencyNext.classList.add('hidden');
+                elements.nextAscendencyName.textContent = 'All nodes allocated!';
+            }
+        }
+        
+        // Update ascendency display when level changes
+        function updateAscendencyDisplay() {
+            const ascendencyPoints = getAscendencyPoints();
+            renderAscendencyChoice();
+            loadLabMap(); // Relab map based on new points
+        }
+        
+        // Initialize lab and ascendency on startup
+        async function initLabAndAscendency() {
+            renderAscendencyChoice();
+            await loadLabMap();
+            
+            // Refresh button
+            if (elements.refreshLabBtn) {
+                elements.refreshLabBtn.addEventListener('click', loadLabMap);
             }
         }
         

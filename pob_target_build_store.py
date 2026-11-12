@@ -502,6 +502,764 @@ def create_earthshatter_berserker_template() -> TargetBuild:
     )
 
 
+def create_earthshatter_berserker_mid_tier() -> TargetBuild:
+    """Mid-tier Earthshatter Berserker (~150-200 div). Solid upgrades from budget, not quite god-tier."""
+    mid_build = create_earthshatter_berserker_template()
+    mid_build.id = "earthshatter_berserker_mid_tier"
+    mid_build.name = "Earthshatter Berserker - Mid Tier (3.30 Covens of Umbra)"
+    mid_build.description = "Mid-tier version with key upgrades. ~150-200 div total. Strong bossing, good tankiness."
+    mid_build.tags = ["mid-tier", "earthshatter", "berserker", "3.30", "covens-of-umbra"]
+    
+    # Keep some uniques, upgrade others
+    for item in mid_build.items:
+        # Weapon: Still rare but better crafted (~1200 pDPS)
+        if item.slot == "Weapon 1":
+            item.target_mods = [
+                "150%+ increased Physical Damage",
+                "22%+ increased Attack Speed",
+                "+2 to Level of Socketed Melee Gems",
+                "Critical Strike Multiplier +",
+                "Critical Strike Chance +",
+                "Gain 1 Rage on Hit"
+            ]
+            item.notes = "Mid tier: 1200+ pDPS. Recombinator craft. ~20-30 div."
+        elif item.slot == "Helmet":
+            item.target_rarity = "Unique"
+            item.target_unique_name = "Echoes of Creation"
+            item.target_mods = [
+                "Enchant: Warcry Buff Effect +",
+                "Enchant: Warcry Cooldown Recovery +"
+            ]
+            item.notes = "Echoes of Creation (30-50 div). Lab enchant for warcry."
+        elif item.slot == "Body Armour":
+            item.target_mods = [
+                "180%+ increased Armour",
+                "+130+ to maximum Life",
+                "+1% to all maximum Elemental Resistances",
+                "Physical Damage taken as Cold/Lightning/Fire",
+                "8% Physical Damage Reduction (Harvest forced)",
+                "Crusader Influence: +1% max Res during Flask Effect"
+            ]
+            item.target_influences = {"crusader": True}
+            item.notes = "Mid tier: 2500+ Armour, 8% PDR. Crusader influence for max res."
+        elif item.slot == "Gloves":
+            item.target_mods = [
+                "Hits have 33% chance to ignore Enemy Physical Damage Reduction",
+                "+90+ to maximum Life",
+                "Attack Speed / Critical Strike mods",
+                "Hunter Influence: Curse on Hit"
+            ]
+            item.target_influences = {"hunter": True}
+            item.notes = "Hunter influence for Curse on Hit. Ignore phys reduct key for damage."
+        elif item.slot == "Boots":
+            item.target_mods = [
+                "30%+ Movement Speed",
+                "5% increased Damage per Endurance Charge",
+                "+90+ to maximum Life",
+                "Redeemer Influence: Regen per Endurance Charge"
+            ]
+            item.target_influences = {"redeemer": True}
+            item.notes = "Redeemer for Endurance Charge regen. Move speed + endurance scaling."
+        elif item.slot == "Amulet":
+            item.target_rarity = "Unique"
+            item.target_unique_name = "Ashes of the Stars"
+            item.target_mods = [
+                "+1 Level to All Skill Gems",
+                "+2% to Quality of All Skill Gems",
+                "Attribute Scaling"
+            ]
+            item.notes = "+1 gem level massive for Earthshatter. Trade only (~150 div)."
+        elif item.slot == "Belt":
+            item.target_rarity = "Unique"
+            item.target_unique_name = "Mageblood"
+            item.target_mods = [
+                "4 Flask Effects",
+                "Life/Resistances during Flask Effect",
+                "Magic Utility Flasks have 50% increased Effect"
+            ]
+            item.notes = "Best flask belt. Trade only (~200 div)."
+        elif item.slot == "Ring 1":
+            item.target_rarity = "Unique"
+            item.target_unique_name = "Circle of Guilt"
+            item.target_mods = [
+                "Critical Strike Multiplier +",
+                "Critical Strike Chance +",
+                "Life / Resistances"
+            ]
+            item.notes = "Circle of Guilt for crit scaling (~60 div)."
+        elif item.slot == "Ring 2":
+            item.target_rarity = "Rare"
+            item.target_mods = [
+                "Critical Strike Multiplier +",
+                "Critical Strike Chance +",
+                "Life / Resistances",
+                "Elemental Damage with Attacks"
+            ]
+            item.target_influences = {"shaper": True}
+            item.notes = "Shaper ring for ele damage with attacks."
+    
+    return mid_build
+
+
+def create_facebreaker_luminary_budget() -> TargetBuild:
+    """Budget Facebreaker Luminary (~30-50 div). League starter friendly."""
+    items = [
+        TargetItem(
+            slot="Weapon 1",
+            base_type="Facebreakers",
+            target_ilvl=1,
+            target_rarity="Unique",
+            target_unique_name="Facebreakers",
+            target_mods=[
+                "Unarmed attacks count as using Main Hand Weapon",
+                "Unarmed attacks count as using Off Hand Weapon",
+                "Physical Damage +"
+            ],
+            crafting_priority="High",
+            notes="Core unique. ~5-10 div. Get best roll possible on physical damage."
+        ),
+        TargetItem(
+            slot="Weapon 2",
+            base_type="Shield",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Resistances +",
+                "Block Chance +",
+                "Spell Block Chance +"
+            ],
+            crafting_priority="High",
+            notes="Shield for block. Craft Life + Res + Block. ~5-10 div."
+        ),
+        TargetItem(
+            slot="Helmet",
+            base_type="Royal Burgonet",
+            target_ilvl=84,
+            target_rarity="Unique",
+            target_unique_name="Fowlorn",
+            target_mods=[
+                "War Cry Cooldown Recovery Speed +",
+                "Life +",
+                "Resistances +"
+            ],
+            crafting_priority="High",
+            notes="Fowlorn for War Cry CDR. ~10-15 div. Alt: Rare with Essence of Horror (Crit Reduction) + Lab enchant."
+        ),
+        TargetItem(
+            slot="Body Armour",
+            base_type="Royal Plate",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Armour +",
+                "Resistances +",
+                "Physical Damage Reduction +"
+            ],
+            crafting_priority="High",
+            notes="Essence of Dread (Armour) on Royal Plate ilvl86+. Harvest force PDR. ~10-20 div."
+        ),
+        TargetItem(
+            slot="Gloves",
+            base_type="Leviathan Gauntlets",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Deep Breaths Anoint",
+            target_mods=[
+                "Anoint: Deep Breaths",
+                "Life +",
+                "Resistances +"
+            ],
+            crafting_priority="High",
+            notes="Deep Breaths anoint for CDR + AoE. ~15-25 div. Alt: Rare with Essence of Loathing (Attack Speed)."
+        ),
+        TargetItem(
+            slot="Boots",
+            base_type="Leviathan Greaves",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Resistances +",
+                "Movement Speed +",
+                "Onslaught on Kill"
+            ],
+            crafting_priority="High",
+            notes="Essence of Zeal (Move Speed + Onslaught). ~5-10 div."
+        ),
+        TargetItem(
+            slot="Amulet",
+            base_type="Onyx Amulet",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Flat Physical Damage to Attacks +",
+                "Life +",
+                "Resistances +",
+                "Attribute Requirements -"
+            ],
+            crafting_priority="Critical",
+            notes="CRITICAL: Flat Phys on amulet is the difference between 0 damage and killing white mobs when Rallying Cry drops. Harvest/Beast craft. ~10-20 div."
+        ),
+        TargetItem(
+            slot="Belt",
+            base_type="Stygian Vise",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Flask Effect Duration +",
+                "Life +",
+                "Resistances +",
+                "Flask Charges gained +"
+            ],
+            crafting_priority="High",
+            notes="Stygian Vise for Abyssal Jewel. Flask Duration + Life/Res. ~5-10 div."
+        ),
+        TargetItem(
+            slot="Ring 1",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Resistances +",
+                "Elemental Damage with Attacks +"
+            ],
+            crafting_priority="Medium",
+            notes="Rare Diamond with Life/Res/Ele Damage. ~5 div."
+        ),
+        TargetItem(
+            slot="Ring 2",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Resistances +",
+                "Elemental Damage with Attacks +"
+            ],
+            crafting_priority="Medium",
+            notes="Rare Diamond with Life/Res/Ele Damage. ~5 div."
+        ),
+        TargetItem(
+            slot="Belt",
+            base_type="Cord Belt",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Cord Belt",
+            target_mods=[],
+            crafting_priority="Medium",
+            notes="Cord Belt back in 3.30. Better than Stygian for this build. ~5 div."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 1 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Warning Call (100% Inc Armour)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive. Mob Mentality + Warning Call core."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 2 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Lead By Example (Onslaught on Crit)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive. Lead By Example for perma Onslaught."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 3 (Small)",
+            base_type="Small Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Lead By Example (Onslaught on Crit)"
+            ],
+            crafting_priority="Medium",
+            notes="Delirium 2-passive for Onslaught uptime."
+        ),
+        TargetItem(
+            slot="Jewel 1",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Impossible Escape",
+            crafting_priority="High",
+            notes="Allows notable allocation without pathing. ~10 div."
+        ),
+        TargetItem(
+            slot="Jewel 2",
+            base_type="Viridian Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Life +",
+                "Damage with Attacks +",
+                "Resistances +"
+            ],
+            crafting_priority="Medium",
+            notes="Budget: Rare Viridian with Life + Damage. ~2 div."
+        ),
+    ]
+
+    return TargetBuild(
+        id="facebreaker_luminary_budget",
+        name="Facebreaker Luminary - Budget (3.30 Covens of Umbra)",
+        description="Budget Facebreaker Luminary league starter. ~30-50 div total. Uses Mercenary Rallying Cry for warcries. Seamless swap from 2H axe Earthshatter.",
+        character_class="Scion",
+        ascendancy="Luminary",
+        target_level=100,
+        target_league="Settlers",
+        main_skill="Earthshatter (Facebreaker + Merc Rallying Cry)",
+        items=items,
+        passive_tree_goals=[
+            "Start Scion → Ascendant → Slayer → Saboteur → Luminary",
+            "Resolute Technique (keystone) - ignore accuracy/evade",
+            "Block nodes (Glancing Blows + Shield Mastery)",
+            "Armour + Life nodes",
+            "Warcry Effect nodes (Mob Mentality clusters)",
+            "Endurance Charge generation (Mob Mentality + Disciple of the Unyielding)",
+            "Block Mastery (Glancing Blows + Shield Mastery)",
+            "Armour Mastery for +1% max res",
+            "Fortify Mastery",
+            "Bastion Breaker for Overwhelm"
+        ],
+        config_overrides={
+            "pantheonMajorGod": "Lunaris",
+            "pantheonMinorGod": "Tukohama",
+            "bandit": "Kill All",
+            "warcry_quality": {
+                "Rallying Cry": 20,
+                "Intimidating Cry": 20,
+                "Seismic Cry": 20,
+                "Enduring Cry": 20,
+                "Infernal Cry": 13,
+                "General's Cry": 20
+            }
+        },
+        tags=["budget", "luminary", "facebreaker", "earthshatter", "3.30", "covens-of-umbra", "league-starter"]
+    )
+
+
+def create_facebreaker_luminary_mid_tier() -> TargetBuild:
+    """Mid-tier Facebreaker Luminary (~150-200 div). Upgrades from budget with better uniques."""
+    items = [
+        TargetItem(
+            slot="Weapon 1",
+            base_type="Facebreakers",
+            target_ilvl=1,
+            target_rarity="Unique",
+            target_unique_name="Facebreakers",
+            target_mods=["+2 to Level of Socketed Melee Gems", "Physical Damage +"],
+            crafting_priority="High",
+            notes="Best roll Facebreakers (+2 gems, high phys). ~30-50 div."
+        ),
+        TargetItem(
+            slot="Weapon 2",
+            base_type="The Anvil",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="The Anvil",
+            target_mods=["Life +", "Armour +", "Block Chance +", "Spell Block Chance +"],
+            crafting_priority="High",
+            notes="The Anvil for massive armour + block. ~20-30 div."
+        ),
+        TargetItem(
+            slot="Helmet",
+            base_type="Royal Burgonet",
+            target_ilvl=84,
+            target_rarity="Unique",
+            target_unique_name="Fowlorn",
+            target_mods=["War Cry Cooldown Recovery Speed +", "Life +", "Resistances +"],
+            crafting_priority="High",
+            notes="Fowlorn with good War Cry CDR roll. ~20 div."
+        ),
+        TargetItem(
+            slot="Body Armour",
+            base_type="Royal Plate",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="The Fourth Vow",
+            target_mods=["Life +", "Armour +", "Resistances +", "Physical Damage Reduction +"],
+            crafting_priority="High",
+            notes="The Fourth Vow for Phys as Cold + Armour. ~30 div."
+        ),
+        TargetItem(
+            slot="Gloves",
+            base_type="Leviathan Gauntlets",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Deep Breaths Anoint",
+            target_mods=["Anoint: Deep Breaths", "Life +", "Resistances +"],
+            crafting_priority="High",
+            notes="Deep Breaths anoint (CDR + AoE). ~25 div."
+        ),
+        TargetItem(
+            slot="Boots",
+            base_type="Leviathan Greaves",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Ralakesh's Impatience",
+            target_mods=["Life +", "Resistances +", "Movement Speed +", "Cannot be Stunned if you've been Hit Recently"],
+            crafting_priority="High",
+            notes="Ralakesh's for perma onslaught + stun immune. ~30 div."
+        ),
+        TargetItem(
+            slot="Amulet",
+            base_type="Onyx Amulet",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Flat Physical Damage to Attacks + (T1)",
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Attribute Requirements -"
+            ],
+            crafting_priority="Critical",
+            notes="T1 Flat Phys + T1 Life. Harvest/Beast craft. ~50 div."
+        ),
+        TargetItem(
+            slot="Belt",
+            base_type="Cord Belt",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Cord Belt",
+            target_mods=[],
+            crafting_priority="Medium",
+            notes="Cord Belt for flask effect. ~10 div."
+        ),
+        TargetItem(
+            slot="Ring 1",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Elemental Damage with Attacks + (T1)",
+                "Physical Damage +"
+            ],
+            crafting_priority="Medium",
+            notes="T1 Life/Res/Ele Dmg. ~15 div."
+        ),
+        TargetItem(
+            slot="Ring 2",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Elemental Damage with Attacks + (T1)",
+                "Physical Damage +"
+            ],
+            crafting_priority="Medium",
+            notes="T1 Life/Res/Ele Dmg. ~15 div."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 1 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Warning Call (100% Inc Armour)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive. Mob Mentality + Warning Call core."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 2 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Lead By Example (Onslaught on Crit)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive. Lead By Example for perma Onslaught."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 3 (Small)",
+            base_type="Small Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Lead By Example (Onslaught on Crit)"
+            ],
+            crafting_priority="Medium",
+            notes="Delirium 2-passive for Onslaught uptime."
+        ),
+        TargetItem(
+            slot="Jewel 1",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Impossible Escape",
+            crafting_priority="High",
+            notes="Impossible Escape. ~15 div."
+        ),
+        TargetItem(
+            slot="Jewel 2",
+            base_type="Viridian Jewel",
+            target_rarity="Rare",
+            target_mods=["Life + (T1)", "Damage with Attacks + (T1)", "Resistances +"],
+            crafting_priority="Medium",
+            notes="T1 Life + Damage. ~10 div."
+        ),
+    ]
+
+    return TargetBuild(
+        id="facebreaker_luminary_mid_tier",
+        name="Facebreaker Luminary - Mid Tier (3.30 Covens of Umbra)",
+        description="Mid-tier Facebreaker Luminary with key unique upgrades. ~150-200 div total. Strong tankiness, good damage.",
+        character_class="Scion",
+        ascendancy="Luminary",
+        target_level=100,
+        target_league="Settlers",
+        main_skill="Earthshatter (Facebreaker + Merc Rallying Cry)",
+        items=items,
+        passive_tree_goals=[
+            "Start Scion → Ascendant → Slayer → Saboteur → Luminary",
+            "Resolute Technique (keystone) - ignore accuracy/evade",
+            "Block nodes (Glancing Blows + Shield Mastery)",
+            "Armour + Life nodes",
+            "Warcry Effect nodes (Mob Mentality clusters)",
+            "Endurance Charge generation (Mob Mentality + Disciple of the Unyielding)",
+            "Block Mastery (Glancing Blows + Shield Mastery)",
+            "Armour Mastery for +1% max res",
+            "Fortify Mastery",
+            "Bastion Breaker for Overwhelm"
+        ],
+        config_overrides={
+            "pantheonMajorGod": "Lunaris",
+            "pantheonMinorGod": "Tukohama",
+            "bandit": "Kill All",
+            "warcry_quality": {
+                "Rallying Cry": 20,
+                "Intimidating Cry": 20,
+                "Seismic Cry": 20,
+                "Enduring Cry": 20,
+                "Infernal Cry": 13,
+                "General's Cry": 20
+            }
+        },
+        tags=["mid-tier", "luminary", "facebreaker", "earthshatter", "3.30", "covens-of-umbra"]
+    )
+
+
+def create_facebreaker_luminary_god_tier() -> TargetBuild:
+    """God-tier Facebreaker Luminary (~500+ div). Mirror-tier version."""
+    items = [
+        TargetItem(
+            slot="Weapon 1",
+            base_type="Facebreakers",
+            target_ilvl=1,
+            target_rarity="Unique",
+            target_unique_name="Facebreakers",
+            target_mods=["+2 to Level of Socketed Melee Gems", "Physical Damage + (T1)"],
+            crafting_priority="High",
+            notes="Mirror-tier Facebreakers (+2 gems, T1 phys). ~200+ div."
+        ),
+        TargetItem(
+            slot="Weapon 2",
+            base_type="Aegis Aurora",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Aegis Aurora",
+            target_mods=["Energy Shield +", "Armour +", "Block Chance +", "Spell Block Chance +"],
+            crafting_priority="High",
+            notes="Aegis Aurora for ES on block. ~50 div."
+        ),
+        TargetItem(
+            slot="Helmet",
+            base_type="Royal Burgonet",
+            target_ilvl=84,
+            target_rarity="Unique",
+            target_unique_name="Fowlorn",
+            target_mods=["War Cry Cooldown Recovery Speed + (T1)", "Life +", "Resistances +"],
+            crafting_priority="High",
+            notes="Perfect roll Fowlorn. ~50 div."
+        ),
+        TargetItem(
+            slot="Body Armour",
+            base_type="Royal Plate",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="The Fourth Vow",
+            target_mods=["Life +", "Armour +", "Resistances +", "Physical Damage taken as Cold +"],
+            crafting_priority="High",
+            notes="The Fourth Vow for Phys as Cold + massive Armour. ~80 div."
+        ),
+        TargetItem(
+            slot="Gloves",
+            base_type="Leviathan Gauntlets",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Deep Breaths Anoint",
+            target_mods=["Anoint: Deep Breaths", "Life +", "Resistances +"],
+            crafting_priority="High",
+            notes="Perfect Deep Breaths anoint. ~40 div."
+        ),
+        TargetItem(
+            slot="Boots",
+            base_type="Leviathan Greaves",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Ralakesh's Impatience",
+            target_mods=["Life +", "Resistances +", "Movement Speed +", "Cannot be Stunned"],
+            crafting_priority="High",
+            notes="Ralakesh's Impatience. ~50 div."
+        ),
+        TargetItem(
+            slot="Amulet",
+            base_type="Onyx Amulet",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Flat Physical Damage to Attacks + (T1)",
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Attribute Requirements -"
+            ],
+            crafting_priority="Critical",
+            notes="Mirror-tier T1 Flat Phys + T1 Life + T1 Res. ~200 div."
+        ),
+        TargetItem(
+            slot="Belt",
+            base_type="Cord Belt",
+            target_ilvl=86,
+            target_rarity="Unique",
+            target_unique_name="Cord Belt",
+            target_mods=[],
+            crafting_priority="Medium",
+            notes="Cord Belt. ~20 div."
+        ),
+        TargetItem(
+            slot="Ring 1",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Elemental Damage with Attacks + (T1)",
+                "Physical Damage + (T1)"
+            ],
+            crafting_priority="Medium",
+            notes="Quad T1. ~50 div."
+        ),
+        TargetItem(
+            slot="Ring 2",
+            base_type="Diamond Ring",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Life + (T1)",
+                "Resistances + (T1)",
+                "Elemental Damage with Attacks + (T1)",
+                "Physical Damage + (T1)"
+            ],
+            crafting_priority="Medium",
+            notes="Quad T1. ~50 div."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 1 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Warning Call (100% Inc Armour)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Perfect 4-passive. ~30 div."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 2 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Lead By Example (Onslaught on Crit)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Perfect 4-passive. ~30 div."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 3 (Small)",
+            base_type="Small Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Lead By Example (Onslaught on Crit)"
+            ],
+            crafting_priority="Medium",
+            notes="Perfect 2-passive. ~15 div."
+        ),
+        TargetItem(
+            slot="Jewel 1",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Impossible Escape",
+            crafting_priority="High",
+            notes="Impossible Escape. ~20 div."
+        ),
+        TargetItem(
+            slot="Jewel 2",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Watchers Eye",
+            target_mods=["Warcry Buff Effect +", "Damage +", "Warcry Cooldown Recovery +"],
+            crafting_priority="High",
+            notes="Watcher's Eye with Warcry mods. ~100 div."
+        ),
+    ]
+
+    return TargetBuild(
+        id="facebreaker_luminary_god_tier",
+        name="Facebreaker Luminary - God Tier (3.30 Covens of Umbra)",
+        description="Mirror-tier Facebreaker Luminary. ~800+ div total. Maximum tankiness and damage.",
+        character_class="Scion",
+        ascendancy="Luminary",
+        target_level=100,
+        target_league="Settlers",
+        main_skill="Earthshatter (Facebreaker + Merc Rallying Cry)",
+        items=items,
+        passive_tree_goals=[
+            "Start Scion → Ascendant → Slayer → Saboteur → Luminary",
+            "Resolute Technique (keystone) - ignore accuracy/evade",
+            "Block nodes (Glancing Blows + Shield Mastery)",
+            "Armour + Life nodes (max life)",
+            "Warcry Effect nodes (Mob Mentality clusters)",
+            "Endurance Charge generation (Mob Mentality + Disciple of the Unyielding)",
+            "Block Mastery (Glancing Blows + Shield Mastery)",
+            "Armour Mastery for +1% max res",
+            "Fortify Mastery",
+            "Bastion Breaker for Overwhelm"
+        ],
+        config_overrides={
+            "pantheonMajorGod": "Lunaris",
+            "pantheonMinorGod": "Tukohama",
+            "bandit": "Kill All",
+            "warcry_quality": {
+                "Rallying Cry": 20,
+                "Intimidating Cry": 20,
+                "Seismic Cry": 20,
+                "Enduring Cry": 20,
+                "Infernal Cry": 13,
+                "General's Cry": 20
+            }
+        },
+        tags=["minmax", "luminary", "facebreaker", "earthshatter", "3.30", "covens-of-umbra"]
+    )
+
+
 def create_budget_version_template() -> TargetBuild:
     """Budget-friendly version (~50 div total)."""
     budget_build = create_earthshatter_berserker_template()

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=/pob-pipeline/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to PoB Pipeline...</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+               display: flex; align-items: center; justify-content: center; 
+               height: 100vh; margin: 0; background: #0d1117; color: #e6edf3; }
+        .redirect { text-align: center; }
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .spinner { border: 3px solid #30363d; border-top: 3px solid #58a6ff; 
+                   border-radius: 50%; width: 40px; height: 40px; 
+                   animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="redirect">
+        <h1>🔄 Redirecting...</h1>
+        <div class="spinner"></div>
+        <p>If you are not redirected automatically, <a href="/pob-pipeline/">click here</a>.</p>
+    </div>
+    <script>
+        window.location.href = '/pob-pipeline/';
+    </script>
+</body>
+</html>

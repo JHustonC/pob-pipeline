@@ -258,4 +258,3 @@ MIT
 - [Path of Building](https://github.com/PathOfBuildingCommunity/PathOfBuilding) — PoB repo
 - [Exile-UI](https://github.com/Lailloken/Exile-UI) — Leveling data (areas, gems, guide, tree)
 - [PoB Community](https://github.com/PathOfBuildingCommunity) — PoB development
-path = "/Users/joecrawford/.hermes/profiles/bot-of-exile/scripts/repo/pob-pipeline/README.md"

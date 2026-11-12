@@ -501,6 +501,55 @@ class LevelingTracker:
         self.target_gems = [item.target_unique_name or item.base_type for item in build.items if item.target_unique_name]
         self.target_passives = []  # Would be loaded from build's passive_tree_goals
     
+    def import_pob_build(self, pob_xml_path: Path):
+        """Import a PoB build XML for leveling guidance (passive tree, gems, items)."""
+        import xml.etree.ElementTree as ET
+        
+        tree = ET.parse(pob_xml_path)
+        root = tree.getroot()
+        
+        # Extract passive tree nodes from the active spec
+        tree_elem = root.find('.//Tree')
+        if tree_elem is not None:
+            active_spec_id = tree_elem.get('activeSpec', '1')
+            for spec in root.findall('.//Spec'):
+                if spec.get('title', '').startswith(str(active_spec_id)) or active_spec_id in spec.get('title', ''):
+                    nodes_str = spec.get('nodes', '')
+                    if nodes_str:
+                        self.target_passives = nodes_str.split(',')
+                        break
+        
+        # Extract skill gems from all Skill elements
+        gems = []
+        for skill in root.findall('.//Skill'):
+            for gem in skill.findall('Gem'):
+                gem_name = gem.get('name')
+                if gem_name and gem.get('enableGlobal1') == 'true':
+                    gems.append(gem_name)
+        
+        # Add to target gems for recommendations
+        self.target_gems.extend([g for g in gems if g not in self.target_gems])
+        
+        # Extract items for reference
+        items = []
+        for item in root.findall('.//Item'):
+            text_content = item.text.strip() if item.text else ""
+            if text_content:
+                lines = text_content.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line and not line.startswith(('Rarity:', 'Unique ID:', 'Item Level:', 'Quality:', 'LevelReq:', 'Armour:', 'ArmourBasePercentile:', 'Sockets:', 'Implicits:', '+', '-', 'Reflects', 'Gain', 'Grants', 'Regenerates', 'Adds')):
+                        if ':' not in line or line.count(':') > 1:
+                            items.append(line)
+                            break
+        
+        print(f"Imported PoB build: {len(self.target_passives)} passive nodes, {len(gems)} gems, {len(items)} items")
+        return {
+            "passive_nodes": self.target_passives,
+            "gems": gems,
+            "items": items
+        }
+    
     def on_state_change(self, callback: Callable[[LevelingState], None]):
         """Register callback for state changes."""
         self._callbacks.append(callback)

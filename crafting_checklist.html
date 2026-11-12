@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthshatter Berserker - Crafting Checklist (3.30 Covens of Umbra)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #e8e8e8;
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #3d3d5c;
+            margin-bottom: 30px;
+        }
+        h1 { font-size: 2rem; color: #ffd700; margin-bottom: 10px; }
+        .subtitle { color: #aaa; font-size: 1.1rem; }
+        .stage-tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .stage-tab {
+            padding: 12px 24px;
+            background: #252542;
+            border: 2px solid #3d3d5c;
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .stage-tab:hover { border-color: #ffd700; color: #ffd700; }
+        .stage-tab.active { background: #ffd700; color: #1a1a2e; border-color: #ffd700; }
+        .stage-content { display: none; }
+        .stage-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .item-card {
+            background: #252542;
+            border: 1px solid #3d3d5c;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+        .item-card:hover { border-color: #555; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .item-card.completed { border-color: #2ecc71; background: #1e3a2e; }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .item-name { font-size: 1.2rem; font-weight: 700; color: #ffd700; }
+        .item-slot { background: #3d3d5c; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; color: #ccc; }
+        .priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .priority.High { background: #e74c3c; color: white; }
+        .priority.Medium { background: #f39c12; color: white; }
+        .priority.Low { background: #3498db; color: white; }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border: 1px solid #3d3d5c;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checkbox-item:hover { border-color: #555; }
+        .checkbox-item.completed { border-color: #2ecc71; background: #1e3a2e; }
+        .checkbox-item input { width: 18px; height: 18px; accent-color: #2ecc71; cursor: pointer; }
+        .checkbox-item label { cursor: pointer; flex: 1; font-size: 0.95rem; }
+        .checkbox-item.completed label { text-decoration: line-through; color: #888; }
+        
+        .notes-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border-left: 3px solid #ffd700;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .notes-title { font-weight: 700; color: #ffd700; margin-bottom: 8px; }
+        .progress-bar {
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .progress-text { text-align: right; font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
+        
+        .budget-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #252542;
+            border-radius: 8px;
+            border: 1px solid #3d3d5c;
+        }
+        .budget-toggle label { cursor: pointer; font-weight: 600; }
+        
+        .farming-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #252542;
+            border-radius: 12px;
+            border: 1px solid #3d3d5c;
+        }
+        .farming-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        .farm-card {
+            background: #1a1a2e;
+            border: 1px solid #3d3d5c;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .farm-card h4 { color: #ffd700; margin-bottom: 10px; }
+        .farm-card ul { list-style: none; }
+        .farm-card li { padding: 5px 0; color: #ccc; border-bottom: 1px solid #333; }
+        .farm-card li:last-child { border-bottom: none; }
+        .farm-card .essence { color: #e74c3c; }
+        .farm-card .harvest { color: #2ecc71; }
+        .farm-card .recombinator { color: #9b59b6; }
+        
+        .export-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2ecc71;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        .export-btn:hover { background: #27ae60; transform: translateY(-2px); }
+        
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .stage-tab { padding: 10px 16px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚔️ Earthshatter Berserker Crafting Checklist</h1>
+            <p class="subtitle">3.30 Covens of Umbra | Fate Bossing | Threads Juicing | Wickerman Viscera</p>
+        </header>
+        
+        <div class="budget-toggle">
+            <input type="checkbox" id="budgetMode" onchange="toggleBudgetMode()">
+            <label for="budgetMode">💰 Budget Mode (~50 div) - Hide chase uniques, show craftable alternatives</label>
+        </div>
+        
+        <div class="stage-tabs">
+            <button class="stage-tab active" onclick="showStage('campaign')">🎮 Campaign (Act 1-10)</button>
+            <button class="stage-tab" onclick="showStage('early')">🗺️ Early Maps (White-Yellow)</button>
+            <button class="stage-tab" onclick="showStage('mid')">🔴 Mid Maps (Red T14-16)</button>
+            <button class="stage-tab" onclick="showStage('endgame')">👑 Endgame / Uber (50-200+ div)</button>
+            <button class="stage-tab" onclick="showStage('swaps')">🔄 Gem/Weapon Swaps</button>
+            <button class="stage-tab" onclick="showStage('farming')">⛏️ Farming Targets</button>
+        </div>
+        
+        <!-- STAGE 1: CAMPAIGN -->
+        <div id="stage-campaign" class="stage-content active">
+            <div class="progress-bar"><div class="progress-fill" id="progress-campaign" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-campaign">0 / 0 items complete</div>
+            
+            <div class="item-card" data-item="weapon-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🪓 Weapon: Whetstone Recipe + Essence</span>
+                    <span class="item-slot">Weapon 1</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>White Axe + Blacksmith's Whetstone + Rustic Sash (Act 1+)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Shrieking/Deafening Essence of Contempt for Flat Phys (Act 3+)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>20% Quality (1 extra fissure for Earthshatter)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Gamble Axes from Tujen/Rogue Exiles (Act 6+)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Whetstone recipe gives %Phys. Essence of Contempt guarantees Flat Phys. Quality is CRITICAL for Earthshatter (fissures).</div>
+            </div>
+            
+            <div class="item-card" data-item="chest-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Chest: Essence of Dread (Royal Plate ilvl86+)</span>
+                    <span class="item-slot">Body Armour</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Deafening Essence of Dread on Royal Plate (Armour)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Target: T1 Armour + Life + 8% Phys Dmg Reduction</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Harvest force 8% PDR (later)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Royal Plate ilvl86+ required for T1 Armour. Essence of Dread = Armour mod. This is your main defensive piece.</div>
+            </div>
+            
+            <div class="item-card" data-item="helmet-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">⛑️ Helmet: Essence of Torment/Horror</span>
+                    <span class="item-slot">Helmet</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Essence of Torment (Avoid Shock) or Horror (Crit Reduction)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Life + Resists</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Avoid Shock is huge vs Fate lightning. Horror = 10% reduced extra dmg from crits per Endurance Charge (suffix).</div>
+            </div>
+            
+            <div class="item-card" data-item="boots-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">👢 Boots: Essence of Zeal (Move Speed + Onslaught)</span>
+                    <span class="item-slot">Boots</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Essence of Zeal (Move Speed + Onslaught on Kill)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Life + Resists</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Onslaught on Kill = free speed + damage. Essential for mapping feel.</div>
+            </div>
+            
+            <div class="item-card" data-item="gloves-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🧤 Gloves: Essence of Loathing/Contempt</span>
+                    <span class="item-slot">Gloves</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Essence of Loathing (Attack Speed) or Contempt (Flat Phys)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Life + Resists</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Attack Speed feels better for Earthshatter. Flat Phys scales warcry damage.</div>
+            </div>
+            
+            <div class="item-card" data-item="shield-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Shield Swap: Redblade Banner + Enduring Cry</span>
+                    <span class="item-slot">Weapon 2</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Redblade Banner (unique shield)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Socket Enduring Cry → 5 Endurance Charges instantly</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Infinite warcry power from shield = free max endurance charges. Swap before boss fights.</div>
+            </div>
+            
+            <div class="item-card" data-item="flasks-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🧪 Flasks: Campaign Essentials</span>
+                    <span class="item-slot">Flasks</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Life Flask: Enduring + Staunching (Bleed Immune)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Mana Flask: Enduring + Surgeon's (sustain at full)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Quicksilver: Adrenaline + Warding</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Silver: Heat + Warding</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Granite: Iron Skin + Warding</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Enduring on Mana Flask = sustains at full mana. Staunching = bleed immune for lab/traps.</div>
+            </div>
+            
+            <div class="item-card" data-item="gems-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Key Gems & Links (Campaign)</span>
+                    <span class="item-slot">Skills</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Earthshatter + Fortify + Overexertion + Fist of War + Pulverise (6L)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Herald of Purity (level 7+)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Frostblink + Faster Attacks + Leap Slam + Lifetap</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Battlemage's Cry + Blood Rage + Vulnerability + Lifetap</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Summon Flame Golem + Lifetap + Rallying Cry + Enduring Cry</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Intimidating Cry + Seismic Cry + Infernal Cry + Autoexertion (4L)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Fortify Support (Act 3 Library) → Mastery later</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Fist of War Support (Act 4) - HUGE damage</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Overexertion + Autoexertion (Act 3/4)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 6L Earthshatter in weapon. Warcries in 4L helmet/body. Autoexertion on Intimidating+Seismic = 3 exerts each. Fist of War at Act 4 = massive damage spike.</div>
+            </div>
+            
+            <div class="item-card" data-item="passive-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🌳 Passive Tree Priorities (Campaign)</span>
+                    <span class="item-slot">Tree</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Life + Armour nodes first</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Disciple of the Unyielding + Endurance Charge nodes</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Fortify Mastery (replace Fortify Support)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Warcry Mastery: 10 min power + Rage generation</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Rage Mastery: sustain max rage</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Armour Mastery: +1% max res per 2000 armour</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Bastion Breaker + Overwhelm for bossing</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Fortify Mastery frees up a support slot. Warcry Mastery gives 10 min power + rage per warcry. Armour Mastery = free max res at high armour.</div>
+            </div>
+            
+            <div class="item-card" data-item="pantheon-campaign" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🏛️ Pantheon & Bandit</span>
+                    <span class="item-slot">Config</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Major: Lunaris (Physical Damage Reduction)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Minor: Tukohama (Fire Damage Reduction + Totem)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('campaign')"><label>Bandit: Kill All (2 passive points)</label></label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- STAGE 2: EARLY MAPS -->
+        <div id="stage-early" class="stage-content">
+            <div class="progress-bar"><div class="progress-fill" id="progress-early" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-early">0 / 0 items complete</div>
+            
+            <div class="item-card" data-item="weapon-early" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🪓 Weapon: ~900-1000 pDPS Bridge Axe</span>
+                    <span class="item-slot">Weapon 1</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Essence Spam (Contempt) for T1 Flat + T2%Phys or T1 Hybrid</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Harvest Reforge Physical on 2-mod axe</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Bench Craft: "Adds x-y Physical" (T1) if missing flat</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>20% Quality (Perfect Fossil/Hillock)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Target 800-1000 pDPS. This carries you through red maps. Budget: 2-5 div.</div>
+            </div>
+            
+            <div class="item-card" data-item="chest-early" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Chest: 2000+ Armour + 8% PDR + Capped Res</span>
+                    <span class="item-slot">Body Armour</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Essence of Dread on Royal Plate ilvl86+</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Harvest force 8% Physical Damage Reduction</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Life + Capped Elemental Res + Chaos Res</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 8% PDR from Harvest is forced craft. This + Fortify + Endurance Charges = massive phys mitigation.</div>
+            </div>
+            
+            <div class="item-card" data-item="helmet-early" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">⛑️ Helmet: Echoes of Creation (or Rare Horror)</span>
+                    <span class="item-slot">Helmet</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Buy Echoes of Creation (30-50 div league start)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Lab Enchant: Warcry Buff Effect / Cooldown Recovery</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Alt: Rare Hubris with Essence of Horror (10% reduced crit dmg per End Charge)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Echoes = 10% Phys as Cold taken = massive EHP. Horror essence = 10% reduced extra dmg from crits per End Charge (suffix).</div>
+            </div>
+            
+            <div class="item-card" data-item="clusters-early" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Cluster Jewels (Core)</span>
+                    <span class="item-slot">Jewels</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Medium #1: Mob Mentality + Warning Call (2 passives)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Medium #2: Mob Mentality + Lead By Example (2 passives)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Small: Lead By Example (Onslaught on Crit)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('early')"><label>Delirium 4-passive or Harvest Reforge</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Mob Mentality = Endurance+Frenzy on Warcry (core!). Warning Call = 100% Inc Armour. Lead By Example = Onslaught on Crit (perma Onslaught).</div>
+            </div
+        </div>
+        
+        <!-- STAGE 3: MID MAPS -->
+        <div id="stage-mid" class="stage-content">
+            <div class="progress-bar"><div class="progress-fill" id="progress-mid" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-mid">0 / 0 items complete</div>
+            
+            <div class="item-card" data-item="weapon-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🪓 Weapon: Recombinator Triple Prefix (1300-1600 pDPS)</span>
+                    <span class="item-slot">Weapon 1</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Buy 20+ Vaal Axes (ilvl83+, 27%+ Quality)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Make Rare → Elders Exalt (Elder Influence)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Alteration Spam with REGEX: Flat+Hybrid Phys</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Augment → Split via Kishara's Decat / Annul</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Brine Hook (Aspect suffix) → Recombine Flat+Hybrid</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Recombine %Phys+AS → Combine both for Triple Prefix</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Tempering Orb: 8% Inc Explicit Phys</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Warlord Slam: Culling Strike / %Phys if Killed</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> ~25-35 div total. The Wanderer's method: Flat+Hybrid → %Phys+AS → Combine. Brine Hook increases suffix pool. Tempering 8% Phys = huge DPS.</div>
+            </div>
+            
+            <div class="item-card" data-item="swap-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🔄 Weapon Swap: Perforate of Duality</span>
+                    <span class="item-slot">Weapon 2</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Transfigured Perforate of Duality (Act 2 corrupt or buy)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Physical Damage + Attack Speed + Impale Chance</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Lower budget axe OK (swap only for immunity phases)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Perforate of Duality hits twice per strike → bypasses immunity phases on bosses (Sirus, Maven, etc.).</div>
+            </div>
+            
+            <div class="item-card" data-item="chest-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Chest: Exarch/Eater Influence + 10% Reduced Crit Dmg</span>
+                    <span class="item-slot">Body Armour</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Exarch/Eater Influence (ilvl86 Royal Plate)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Essence of Horror → 10% Reduced Extra Dmg from Crits per End Charge (Fracture suffix)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Harvest force 8% PDR + Life + Max Res</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Tempering 8% Armour</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 10% Reduced Extra Dmg from Crits per End Charge = functional crit immunity with 8+ charges. Fracture the Horror suffix. Exarch/Eater for +1% max res during flask.</div>
+            </div>
+            
+            <div class="item-card" data-item="helmet-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">⛑️ Helmet: Echoes of Creation (Mandatory)</span>
+                    <span class="item-slot">Helmet</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Echoes of Creation (10% Phys as Cold Taken)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Lab Enchant: Warcry Buff Effect / Cooldown Recovery</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 10% Phys as Cold Taken = massive EHP vs physical. Mandatory for endgame. Shaper base for "Cannot be Frozen" etc.</div>
+            </div>
+            
+            <div class="item-card" data-item="boots-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">👢 Boots: Onslaught on Kill + Move Speed</span>
+                    <span class="item-slot">Boots</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Essence of Zeal (Move Speed + Onslaught on Kill)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Redeemer Influence: Regen per Endurance Charge</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Onslaught on Kill = free uptime. Redeemer = Life Regen per End Charge (synergy with Mob Mentality).</div>
+            </div>
+            
+            <div class="item-card" data-item="gloves-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🧤 Gloves: Ignore Phys Reduction + Hunter Curse</span>
+                    <span class="item-slot">Gloves</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Essence of Loathing (Attack Speed) or Contempt (Flat Phys)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>"Hits have 33% chance to ignore Enemy Physical Damage Reduction"</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Hunter Influence: Curse on Hit (Vulnerability/Assassin's Mark)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Ignore Phys Reduction = massive damage vs tanky bosses. Hunter = free curse on hit.</div>
+            </div>
+            
+            <div class="item-card" data-item="amulet-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💍 Amulet: Ashes of the Stars (Trade)</span>
+                    <span class="item-slot">Amulet</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Ashes of the Stars (+1 Gem Level, +2% Quality)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>~150 div - Trade only</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> +1 Gem Level = massive for Earthshatter (21→22, 20→21 on supports). Budget: Rare Onyx with +1 Skill, Attributes, Life.</div>
+            </div>
+            
+            <div class="item-card" data-item="belt-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🎗️ Belt: Mageblood (Trade)</span>
+                    <span class="item-slot">Belt</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Mageblood (4 Flask Effects, Life/Res during Flask)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>~200 div - Trade only</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Best belt for flask builds. Budget: Stygian Vise with Flask Duration, Life, Res, Abyssal Jewel.</div>
+            </div>
+            
+            <div class="item-card" data-item="rings-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💍 Rings: Circle of Guilt + Shaper Diamond</span>
+                    <span class="item-slot">Rings</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Ring 1: Circle of Guilt (Crit Multi/Chance) ~60 div</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Ring 2: Shaper Diamond (Ele Damage with Attacks)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Circle of Guilt = double damage on crit. Shaper = Ele Damage with Attacks (scales Herald of Purity + converted cold).</div>
+            </div>
+            
+            <div class="item-card" data-item="flasks-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🧪 Flasks: T17 Endgame Suite</span>
+                    <span class="item-slot">Flasks</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Life: Staunching (Bleed Immune) + Enduring</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Mana: Enduring + Surgeon's</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Quicksilver: Adrenaline + Warding</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Silver: Heat + Warding</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Ruby/Topaz/Sapphire: Heat + Warding (T17 max res)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Heat = 50% reduced Elemental Ailment Duration. Warding = Curse Immune. Essential for T17/Fate bosses.</div>
+            </div>
+            
+            <div class="item-card" data-item="jewels-mid" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Jewels: Impossible Escape + Stormshroud</span>
+                    <span class="item-slot">Jewels</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Impossible Escape (allocate notables without pathing)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('mid')"><label>Stormshroud (Phys as Cold for defence)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Impossible Escape lets you grab notables like "Bastion Breaker" without pathing. Stormshroud = 40% Phys as Cold = free phys mitigation.</div>
+            </div>
+        </div>
+        
+        <!-- STAGE 4: ENDGAME -->
+        <div id="stage-endgame" class="stage-content">
+            <div class="progress-bar"><div class="progress-fill" id="progress-endgame" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-endgame">0 / 0 items complete</div>
+            
+            <div class="item-card" data-item="weapon-endgame" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🪓 Weapon: Mirror-tier 1600+ pDPS</span>
+                    <span class="item-slot">Weapon 1</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Tempering 8% Phys (repeat until hit)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Warlord Slam: Culling Strike / %Phys if Killed</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Quality 30% (Perfect Fossil/Hillock)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>T1 Flat + T1 Hybrid + T1 %Phys + T1 Speed + Culling</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 100+ div. Each Tempering = 5-10 div. Warlord slam = 5-10 div. Mirror service if you hit perfect base.</div>
+            </div>
+            
+            <div class="item-card" data-item="chest-endgame" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Chest: 3000+ Armour + 8% PDR + 10% Crit Redux</span>
+                    <span class="item-slot">Body Armour</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Exarch/Eater + Tempering 8% Armour</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Harvest force 8% PDR + Life + Max Res</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Essence of Horror → 10% Reduced Crit Dmg per End Charge (Fractured)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Functional crit immunity with 8+ Endurance Charges. Tempering 8% Armour on 3000 base = 240 free armour.</div>
+            </div>
+            
+            <div class="item-card" data-item="progenesis-endgame" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🛡️ Progenesis (25% Less Dmg Taken)</span>
+                    <span class="item-slot">Body Armour Swap</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Progenesis (Unique) - 25% Less Damage Taken</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Swap for hardest Uber fights (Sirus, Maven, Eater/Exarch)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> 25% Less Damage Taken = massive EHP. Lose armour/ES but gain flat mitigation. Use for immunity phases.</div>
+            </div>
+            
+            <div class="item-card" data-item="warcries-endgame" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">🎵 Warcry Quality Optimization</span>
+                    <span class="item-slot">Config</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Intimidating Cry: 20% Quality</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Infernal Cry: 13% Quality</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Seismic Cry: 20% Quality</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Rallying Cry: 13% Quality</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>Enduring Cry: 20% Quality</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('endgame')"><label>General's Cry: 20% Quality</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Staggered cooldowns = perma uptime. Intimidating at 20% = 3 exerts. Infernal at 13% = synced with others. Buy from Tujen for quality gems.</div>
+            </div>
+        </div>
+        
+        <!-- STAGE 5: SWAPS -->
+        <div id="stage-swaps" class="stage-content">
+            <div class="progress-bar"><div class="progress-fill" id="progress-swaps" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-swaps">0 / 0 items complete</div>
+            
+            <div class="item-card" data-item="gem-swap-1" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Main 6L: Earthshatter + Overexertion + Fist of War + Close Combat + Pulverise + Melee Phys</span>
+                    <span class="item-slot">Weapon 1 (6L)</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Earthshatter (21/20)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Support Overexertion (21/20)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Support Fist of War (20/20)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Support Close Combat (21/20)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Support Pulverise (21/20)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Support Melee Physical Damage (20/20)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Close Combat = more damage at close range (Earthshatter is melee). Pulverise = AoE. Fist of War = damage + exerts. Drop Fortify (Mastery). Drop Lifetap (Mana Flask).</div>
+            </div>
+            
+            <div class="item-card" data-item="gem-swap-2" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Warcry 4L: Intimidating + Seismic + Infernal + Autoexertion</span>
+                    <span class="item-slot">Helmet/Body (4L)</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Intimidating Cry (20/23)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Seismic Cry (20/23)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Infernal Cry (20/23)</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Autoexertion (20/23)</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Autoexertion on Intimidating+Seismic = 3 exerts each. Infernal for explosions + mana leech (with Mana Leech Support).</div>
+            </div
+            
+            <div class="item-card" data-item="gem-swap-3" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Utility: Berserk + Frostblink + Leap Slam + Blood and Sand + Flesh and Stone</span>
+                    <span class="item-slot">Gloves/Boots (4L)</span>
+                    <span class="priority Medium">Medium</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Berserk (20/20) - Rage dump for damage</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Frostblink (13-20/20) - Movement + Chill</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Leap Slam (20/20) - Movement</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Blood and Stone (7/20) - Maim + Blind</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Flesh and Stone (20/23) - Sand stance = Blind</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Sand stance Flesh and Stone = Blind aura (huge defence). Maim on Leap Slam = 10% more damage vs maimed. Berserk = Rage dump for 40% more damage.</div>
+            </div
+            
+            <div class="item-card" data-item="gem-swap-4" data-budget="false">
+                <div class="item-header">
+                    <span class="item-name">💎 Auras: Pride + Herald of Purity + Enlighten (4L)</span>
+                    <span class="item-slot">Body/Helmet (4L)</span>
+                    <span class="priority High">High</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Pride (21/20) - Physical as Extra Chaos</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Herald of Purity (21/20) - Minion damage + phys</label></label>
+                    <label class="checkbox-item"><input type="checkbox" onchange="updateProgress('swaps')"><label>Enlighten (4/20) - Reservation efficiency</label></label>
+                </div>
+                <div class="notes-section"><span class="notes-title">📝 Notes:</span> Pride = phys as extra chaos (scales with phys damage). Herald of Purity = free minion damage. Enlighten lvl 4 = 87% mana res (allows Pride+Herald+Flesh+Stone+Blood+Sand).</div>
+            </div
+        </div>
+        
+        <!-- STAGE 6: FARMING -->
+        <div id="stage-farming" class="stage-content">
+            <div class="progress-bar"><div class="progress-fill" id="progress-farming" style="width: 0%"></div></div>
+            <div class="progress-text" id="progress-text-farming">0 / 0 items complete</div>
+            
+            <div class="farming-section">
+                <h3>🎯 Farming Targets for Earthshatter Crafting Materials</h3>
+                <p style="color: #aaa; margin-bottom: 20px;">Sell what you don't need/use. Focus on Essences (crafting) + Harvest (forced crafts) + Recombinator bases.</p>
+                
+                <div class="farming-grid">
+                    <div class="farm-card">
+                        <h4>🔮 Essences (Primary Crafting)</h4>
+                        <ul>
+                            <li class="essence">Essence of Contempt (Flat Phys) - Weapon</li>
+                            <li class="essence">Essence of Dread (Armour) - Chest</li>
+                            <li class="essence">Essence of Loathing (Attack Speed) - Gloves/Boots</li>
+                            <li class="essence">Essence of Zeal (Move Speed + Onslaught) - Boots</li>
+                            <li class="essence">Essence of Torment (Avoid Shock) - Helmet</li>
+                            <li class="essence">Essence of Horror (Crit Reduction) - Helmet/Chest</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">Farm: Essence Monoliths, Memory modifiers, Corrupted Essences. Sell excess T1-T3 essences.</p>
+                    </div>
+                    
+                    <div class="farm-card">
+                        <h4>🌾 Harvest (Forced Crafts)</h4>
+                        <ul>
+                            <li class="harvest">Physical Damage Reduction (8% PDR) - Chest</li>
+                            <li class="harvest">Augment Physical (Weapon)</li>
+                            <li class="harvest">Augment Armour (Chest/Helmet)</li>
+                            <li class="harvest">Augment Life (All gear)</li>
+                            <li class="harvest">Augment Speed (Boots/Gloves)</li>
+                            <li class="harvest">Force Specific Mods (Crit Reduction, etc.)</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">Farm: Wild/Vivid/Primal Roots in maps. Harvest crafts are deterministic - use for forced PDR, Life, Res.</p>
+                    </div>
+                    
+                    <div class="farm-card">
+                        <h4>🔬 Recombinator (Weapon Crafting)</h4>
+                        <ul>
+                            <li class="recombinator">Vaal Axes (ilvl83+, 27%+ Quality)</li>
+                            <li class="recombinator">Elders Exalted Orbs (Elder Influence)</li>
+                            <li class="recombinator">Brine Hook (Aspect suffix)</li>
+                            <li class="recombinator">Kishara's Decat / Annul Orbs</li>
+                            <li class="recombinator">Tempering Orbs (8% Phys)</li>
+                            <li class="recombinator">Warlord Exalted Orbs (Slams)</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">Buy bases in bulk. Recombinator crafting is RNG but profitable. Sell failed recombinations.</p>
+                    </div>
+                    
+                    <div class="farm-card">
+                        <h4>⚔️ Delirium (Cluster Jewels)</h4>
+                        <ul>
+                            <li class="essence">Medium 4-passive: Mob Mentality + Warning Call</li>
+                            <li class="essence">Medium 4-passive: Mob Mentality + Lead By Example</li>
+                            <li class="essence">Small 2-passive: Lead By Example</li>
+                            <li class="essence">Delirium Orbs (Threaded) for map juice</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">Simulacrum splinters → Simulacrum (Wave 20-30). Or buy clusters from Simulacrum farmers.</p>
+                    </div>
+                    
+                    <div class="farm-card">
+                        <h4>🗺️ Atlas Strategy (3.30 Threads)</h4>
+                        <ul>
+                            <li class="harvest">Shaped Regions: Complete objectives for free Threads</li>
+                            <li class="harvest">Abyss/Breach/Ritual Threads for map juice</li>
+                            <li class="harvest">Frayed Threads (random Thread or vendor)</li>
+                            <li class="essence">Kirac Missions for Essence/Harvest</li>
+                            <li class="recombinator">Blighted Maps (fallback farm - no gear needed)</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">3.30: Scarabs removed → Threads. Push 8 Threads for max rewards. Blighted Maps = no-gear fallback.</p>
+                    </div>
+                    
+                    <div class="farm-card">
+                        <h4>💰 Sell List (Don't Hoard)</h4>
+                        <ul>
+                            <li>Excess Essences (keep only Contempt/Dread/Loathing/Zeal/Torment/Horror)</li>
+                            <li>Failed Recombinations (failed prefixes/suffixes → vendor or sell cheap)</li>
+                            <li>Low-tier Harvest crafts (keep only Phys Reduct, Aug Phys, Aug Life, Aug Armour, Aug Speed)</li>
+                            <li>Excess Cluster Jewels (wrong notables)</li>
+                            <li>Low-quality Vaal Axes (<27% quality)</li>
+                            <li>Excess Elders Exalts / Tempering / Warlord Exalts (sell high, buy when needed)</li>
+                            <li>Frayed Threads (vendor for random Thread or sell)</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; color: #888;">Liquidity > Hoarding. Sell at peak demand (week 1-2). Buy back cheaper later.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="export-btn" onclick="exportChecklist()">📥 Export Checklist (JSON)</button>
+    </div>
+
+    <script>
+        // Stage management
+        function showStage(stageId) {
+            document.querySelectorAll('.stage-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('stage-' + stageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Progress tracking
+        const stageItems = {
+            campaign: document.querySelectorAll('#stage-campaign .item-card'),
+            early: document.querySelectorAll('#stage-early .item-card'),
+            mid: document.querySelectorAll('#stage-mid .item-card'),
+            endgame: document.querySelectorAll('#stage-endgame .item-card'),
+            swaps: document.querySelectorAll('#stage-swaps .item-card'),
+            farming: document.querySelectorAll('#stage-farming .item-card')
+        };
+        
+        function updateProgress(stage) {
+            const items = stageItems[stage];
+            let checked = 0, total = 0;
+            items.forEach(item => {
+                if (item.dataset.budget === 'true' && budgetMode) return;
+                const checkboxes = item.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => { total++; if (cb.checked) checked++; });
+                // Update item card visual
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                item.classList.toggle('completed', allChecked && checkboxes.length > 0);
+            });
+            const pct = total > 0 ? (checked / total * 100) : 0;
+            document.getElementById('progress-' + stage).style.width = pct + '%';
+            document.getElementById('progress-text-' + stage).textContent = `${checked} / ${total} tasks complete`;
+        }
+        
+        // Budget mode toggle
+        let budgetMode = false;
+        function toggleBudgetMode() {
+            budgetMode = document.getElementById('budgetMode').checked;
+            document.querySelectorAll('.item-card[data-budget="true"]').forEach(card => {
+                card.style.display = budgetMode ? 'none' : 'block';
+            });
+            document.querySelectorAll('.item-card[data-budget="false"]').forEach(card => {
+                // In budget mode, show budget alternatives (which are in the same cards with updated notes)
+            });
+            // Recalculate progress for all stages
+            Object.keys(stageItems).forEach(updateProgress);
+        }
+        
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('earthshatter_crafting_checklist');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(stage => {
+                    data[stage].forEach((checked, idx) => {
+                        const items = stageItems[stage];
+                        if (items[idx]) {
+                            const cb = items[idx].querySelectorAll('input[type="checkbox"]');
+                            if (cb[checked]) cb[checked].checked = true;
+                        });
+                    updateProgress(stage);
+                });
+                budgetMode = data.budgetMode || false;
+                document.getElementById('budgetMode').checked = budgetMode;
+                toggleBudgetMode();
+            }
+        }
+        
+        // Save state
+        function saveState() {
+            const data = { budgetMode };
+            Object.keys(stageItems).forEach(stage => {
+                data[stage] = [];
+                stageItems[stage].forEach((item, itemIdx) => {
+                    item.querySelectorAll('input[type="checkbox"]').forEach((cb, cbIdx) => {
+                        if (cb.checked) data[stage].push([itemIdx, cbIdx]);
+                    });
+                });
+            });
+            localStorage.setItem('earthshatter_crafting_checklist', JSON.stringify(data));
+        }
+        
+        // Auto-save on checkbox change
+        document.addEventListener('change', e => {
+            if (e.target.type === 'checkbox') {
+                saveState();
+            }
+        });
+        
+        // Export checklist
+        function exportChecklist() {
+            const data = { budgetMode, timestamp: new Date().toISOString() };
+            Object.keys(stageItems).forEach(stage => {
+                data[stage] = [];
+                stageItems[stage].forEach((item, itemIdx) => {
+                    const checks = [];
+                    item.querySelectorAll('input[type="checkbox"]').forEach((cb, cbIdx) => {
+                        if (cb.checked) checks.push(cbIdx);
+                    });
+                    if (checks.length > 0) {
+                        data[stage].push({ item: itemIdx, checks, name: item.querySelector('.item-name').textContent });
+                    }
+                });
+            });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `earthshatter_crafting_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            Object.keys(stageItems).forEach(updateProgress);
+        });
+    </script>
+</body>
+</html>

@@ -995,11 +995,17 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(build.character_class, "Marauder")
         self.assertEqual(build.ascendancy, "Berserker")
         self.assertEqual(build.target_level, 100)
-        self.assertEqual(build.main_skill, "Earthshatter / Perforate of Duality")
+        self.assertEqual(build.main_skill, "Earthshatter / Perforate of Duality (swap)")
         
         # Check all slots present
         slots = {item.slot for item in build.items}
-        expected_slots = {"Weapon 1", "Helmet", "Body Armour", "Gloves", "Boots", "Amulet", "Belt", "Ring 1", "Ring 2"}
+        expected_slots = {
+            "Weapon 1", "Weapon 2 (Swap)", "Helmet", "Body Armour", "Gloves", "Boots", 
+            "Amulet", "Belt", "Ring 1", "Ring 2",
+            "Flask 1", "Flask 2", "Flask 3", "Flask 4", "Flask 5",
+            "Cluster Jewel 1 (Medium)", "Cluster Jewel 2 (Medium)", "Cluster Jewel 3 (Small)",
+            "Jewel 1", "Jewel 2"
+        }
         self.assertEqual(slots, expected_slots)
         
         # Check unique items
@@ -1019,20 +1025,29 @@ class TestTemplates(unittest.TestCase):
         build = create_budget_version_template()
         
         self.assertEqual(build.id, "earthshatter_berserker_budget")
-        self.assertEqual(build.tags, ["budget", "earthshatter", "berserker", "3.30"])
+        self.assertEqual(build.tags, ["budget", "earthshatter", "berserker", "3.30", "covens-of-umbra"])
         
         # Should have same slots but as rares
         slots = {item.slot for item in build.items}
-        expected_slots = {"Weapon 1", "Helmet", "Body Armour", "Gloves", "Boots", "Amulet", "Belt", "Ring 1", "Ring 2"}
+        expected_slots = {
+            "Weapon 1", "Weapon 2 (Swap)", "Helmet", "Body Armour", "Gloves", "Boots", 
+            "Amulet", "Belt", "Ring 1", "Ring 2",
+            "Flask 1", "Flask 2", "Flask 3", "Flask 4", "Flask 5",
+            "Cluster Jewel 1 (Medium)", "Cluster Jewel 2 (Medium)", "Cluster Jewel 3 (Small)",
+            "Jewel 1", "Jewel 2"
+        }
         self.assertEqual(slots, expected_slots)
         
         # No uniques - all should be Rare
         uniques = [i for i in build.items if i.target_unique_name]
         self.assertEqual(len(uniques), 0)
         
-        # All should be Rare
+        # All should be Rare (except flasks which are Magic)
         for item in build.items:
-            self.assertEqual(item.target_rarity, "Rare")
+            if item.slot.startswith("Flask"):
+                self.assertEqual(item.target_rarity, "Magic")
+            else:
+                self.assertEqual(item.target_rarity, "Rare")
 
 
 # ============================================================

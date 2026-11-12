@@ -238,7 +238,21 @@ def create_earthshatter_berserker_template() -> TargetBuild:
             ],
             target_influences={"warlord": True},
             crafting_priority="High",
-            notes="God tier: 180%+ phys, 25%+ AS, +2 melee, crit multi/chance, warlord influence for +1 rage"
+            notes="God tier: 180%+ phys, 25%+ AS, +2 melee, crit multi/chance, warlord influence for +1 rage. Crafting: Recombinator (Flat+Hybrid Phys → %Phys+AS → combine). ~25-35 div. Tempering 8% Phys. Warlord slam for Culling/Phys if Killed."
+        ),
+        TargetItem(
+            slot="Weapon 2 (Swap)",
+            base_type="Vaal Axe",
+            target_ilvl=86,
+            target_rarity="Rare",
+            target_mods=[
+                "Perforate of Duality (Transfigured)",
+                "Physical Damage +",
+                "Attack Speed +",
+                "Impale Chance +"
+            ],
+            crafting_priority="Medium",
+            notes="Swap for Perforate of Duality on immunity phases. Can use lower budget axe."
         ),
         TargetItem(
             slot="Helmet",
@@ -251,7 +265,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
                 "Enchant: Warcry Cooldown Recovery +"
             ],
             crafting_priority="High",
-            notes="Lab enchant for warcry build"
+            notes="Lab enchant for warcry build. Buy or run Lab for enchant. 30-50 div at league start."
         ),
         TargetItem(
             slot="Body Armour",
@@ -263,11 +277,12 @@ def create_earthshatter_berserker_template() -> TargetBuild:
                 "+150+ to maximum Life",
                 "+1% to all maximum Elemental Resistances",
                 "Physical Damage taken as Cold/Lightning/Fire",
+                "8% Physical Damage Reduction (Harvest forced)",
                 "Crusader Influence: +1% max Res during Flask Effect"
             ],
             target_influences={"crusader": True},
             crafting_priority="High",
-            notes="Max armour stacking with max res and phys taken as elemental"
+            notes="Max armour stacking with max res and phys taken as elemental. Crafting: Essence of Dread (Armour) on Royal Plate ilvl86+ → Harvest force 8% PDR → Tempering 8% Armour. Exarch/Eater influence for additional max res."
         ),
         TargetItem(
             slot="Gloves",
@@ -282,7 +297,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
             ],
             target_influences={"hunter": True},
             crafting_priority="High",
-            notes="Hits ignore phys reduction is key for damage"
+            notes="Hits ignore phys reduction is key for damage. Crafting: Essence of Loathing (Attack Speed) or Contempt (Flat Phys) → Hunter influence for Curse on Hit."
         ),
         TargetItem(
             slot="Boots",
@@ -297,7 +312,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
             ],
             target_influences={"redeemer": True},
             crafting_priority="High",
-            notes="Movement speed + endurance charge scaling"
+            notes="Movement speed + endurance charge scaling. Crafting: Essence of Zeal (Move Speed + Onslaught on Kill) → Redeemer influence for Regen per End Charge."
         ),
         TargetItem(
             slot="Amulet",
@@ -311,7 +326,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
                 "Attribute Scaling"
             ],
             crafting_priority="High",
-            notes="+1 gem level is massive for Earthshatter"
+            notes="+1 gem level is massive for Earthshatter. Trade only (~150 div). Budget: Rare Onyx with +1 Skill, Attributes, Life."
         ),
         TargetItem(
             slot="Belt",
@@ -325,7 +340,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
                 "Magic Utility Flasks have 50% increased Effect"
             ],
             crafting_priority="High",
-            notes="Best belt for flask builds - trade only"
+            notes="Best belt for flask builds - trade only (~200 div). Budget: Rare Stygian Vise with Flask Effect Duration, Life, Res."
         ),
         TargetItem(
             slot="Ring 1",
@@ -339,7 +354,7 @@ def create_earthshatter_berserker_template() -> TargetBuild:
                 "Life / Resistances"
             ],
             crafting_priority="High",
-            notes="Circle of Guilt for crit scaling"
+            notes="Circle of Guilt for crit scaling (~60 div). Budget: Rare Diamond with Crit Multi/Chance, Life, Res."
         ),
         TargetItem(
             slot="Ring 2",
@@ -354,33 +369,136 @@ def create_earthshatter_berserker_template() -> TargetBuild:
             ],
             target_influences={"shaper": True},
             crafting_priority="Medium",
-            notes="Shaper ring for ele damage with attacks"
+            notes="Shaper ring for ele damage with attacks. Crafting: Essence of Loathing → Shaper influence."
+        ),
+        TargetItem(
+            slot="Flask 1",
+            base_type="Divine Life Flask",
+            target_rarity="Magic",
+            target_mods=["Staunching (Bleed Immune)", "Enduring"],
+            crafting_priority="High",
+            notes="Bleed immune + Enduring for sustain"
+        ),
+        TargetItem(
+            slot="Flask 2",
+            base_type="Mana Flask",
+            target_rarity="Magic",
+            target_mods=["Enduring", "Surgeon's"],
+            crafting_priority="High",
+            notes="Enduring for mana sustain at full"
+        ),
+        TargetItem(
+            slot="Flask 3",
+            base_type="Quicksilver Flask",
+            target_rarity="Magic",
+            target_mods=["Adrenaline", "Warding"],
+            crafting_priority="High",
+            notes="Adrenaline for speed, Warding for curse immune"
+        ),
+        TargetItem(
+            slot="Flask 4",
+            base_type="Silver Flask",
+            target_rarity="Magic",
+            target_mods=["Heat", "Warding"],
+            crafting_priority="High",
+            notes="T17 ele res + curse immune"
+        ),
+        TargetItem(
+            slot="Flask 5",
+            base_type="Ruby/Topaz/Sapphire Flask",
+            target_rarity="Magic",
+            target_mods=["Heat", "Warding"],
+            crafting_priority="Medium",
+            notes="T17 max ele res"
+        ),
+        TargetItem(
+            slot="Cluster Jewel 1 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Warning Call (100% Inc Armour)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive or Harvest Reforge. Mob Mentality + Warning Call core."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 2 (Medium)",
+            base_type="Medium Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Mob Mentality (Endurance + Frenzy on Warcry)",
+                "Lead By Example (Onslaught on Crit)",
+                "2 passive skills"
+            ],
+            crafting_priority="High",
+            notes="Delirium 4-passive. Lead By Example for perma Onslaught."
+        ),
+        TargetItem(
+            slot="Cluster Jewel 3 (Small)",
+            base_type="Small Cluster Jewel",
+            target_rarity="Rare",
+            target_mods=[
+                "Lead By Example (Onslaught on Crit)"
+            ],
+            crafting_priority="Medium",
+            notes="Delirium 2-passive for Onslaught uptime"
+        ),
+        TargetItem(
+            slot="Jewel 1",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Impossible Escape",
+            crafting_priority="High",
+            notes="Allows notable allocation without pathing"
+        ),
+        TargetItem(
+            slot="Jewel 2",
+            base_type="Viridian Jewel",
+            target_rarity="Unique",
+            target_unique_name="Stormshroud",
+            crafting_priority="Medium",
+            notes="Physical as Cold for defence"
         ),
     ]
-    
+
     return TargetBuild(
         id="earthshatter_berserker_god_tier",
-        name="Earthshatter Berserker - God Tier (3.30)",
-        description="Min-maxed Earthshatter Berserker for Uber boss farming. Uses Perforate of Duality swap for immunity phases.",
+        name="Earthshatter Berserker - God Tier (3.30 Covens of Umbra)",
+        description="Min-maxed Earthshatter Berserker for Uber boss farming. Uses Perforate of Duality swap for immunity phases. 3.30: Covens of Umbra - Fate bossing, Threads juicing, Wickerman Viscera.",
         character_class="Marauder",
         ascendancy="Berserker",
         target_level=100,
         target_league="Settlers",
-        main_skill="Earthshatter / Perforate of Duality",
+        main_skill="Earthshatter / Perforate of Duality (swap)",
         items=items,
         passive_tree_goals=[
             "Allocate all life/armour nodes",
-            "Maximize warcry effect nodes",
-            "Get Rage mastery + Warcry mastery",
+            "Maximize warcry effect nodes (Mob Mentality clusters)",
+            "Get Rage mastery + Warcry mastery (10 min power, rage gen)",
             "Divine Shield for ES from armour",
-            "Armour Mastery for +1% max res"
+            "Armour Mastery for +1% max res",
+            "Fortify Mastery (replace Fortify Support)",
+            "Fist of War Support from Act 4",
+            "Overexertion + Autoexertion for 6 exerts on Intimidating Cry",
+            "Disciple of the Unyielding + Endurance charge nodes early",
+            "Bastion Breaker + Overwhelm mastery for bossing"
         ],
         config_overrides={
             "pantheonMajorGod": "Lunaris",
             "pantheonMinorGod": "Tukohama",
-            "bandit": "Kill All"
+            "bandit": "Kill All",
+            "warcry_quality": {
+                "Intimidating Cry": 20,
+                "Infernal Cry": 13,
+                "Seismic Cry": 20,
+                "Rallying Cry": 13,
+                "Enduring Cry": 20,
+                "General's Cry": 20
+            }
         },
-        tags=["minmax", "uber-bossing", "earthshatter", "berserker", "3.30"]
+        tags=["minmax", "uber-bossing", "earthshatter", "berserker", "3.30", "covens-of-umbra"]
     )
 
 
@@ -388,9 +506,9 @@ def create_budget_version_template() -> TargetBuild:
     """Budget-friendly version (~50 div total)."""
     budget_build = create_earthshatter_berserker_template()
     budget_build.id = "earthshatter_berserker_budget"
-    budget_build.name = "Earthshatter Berserker - Budget (3.30)"
-    budget_build.description = "Budget version using craftable rares instead of chase uniques. ~50 div total."
-    budget_build.tags = ["budget", "earthshatter", "berserker", "3.30"]
+    budget_build.name = "Earthshatter Berserker - Budget (3.30 Covens of Umbra)"
+    budget_build.description = "Budget version using craftable rares instead of chase uniques. ~50 div total. 3.30: Covens of Umbra."
+    budget_build.tags = ["budget", "earthshatter", "berserker", "3.30", "covens-of-umbra"]
     
     # Modify items for budget - convert ALL uniques to rares
     for item in budget_build.items:
@@ -399,24 +517,55 @@ def create_budget_version_template() -> TargetBuild:
             item.target_rarity = "Rare"
             item.target_mods = [m for m in item.target_mods if "Unique" not in m]
             item.crafting_priority = "Medium"
-            item.notes = f"Budget rare version (craftable)"
+            item.notes = f"Budget rare version (craftable) - {item.notes}"
     
-    # Add budget notes
-    budget_build.items[5].target_mods = [  # Amulet
-        "+1 Level to All Skill Gems",
-        "Attribute Scaling",
-        "Life / Resistances"
-    ]
-    budget_build.items[6].target_mods = [  # Belt
-        "Flask Effect Duration +",
-        "Life / Resistances during Flask Effect",
-        "Flask Charges gained +"
-    ]
-    budget_build.items[7].target_mods = [  # Ring 1
-        "Critical Strike Multiplier +",
-        "Critical Strike Chance +",
-        "Life / Resistances"
-    ]
+    # Specific budget overrides
+    for item in budget_build.items:
+        if item.slot == "Amulet":
+            item.target_mods = [
+                "+1 Level to All Skill Gems",
+                "Attribute Scaling",
+                "Life / Resistances"
+            ]
+            item.notes = "Budget: Craft +1 Skill on Onyx Amulet (Harvest/Beast) + Attributes + Life"
+        elif item.slot == "Belt":
+            item.target_mods = [
+                "Flask Effect Duration +",
+                "Life / Resistances during Flask Effect",
+                "Flask Charges gained +"
+            ]
+            item.notes = "Budget: Stygian Vise with Flask Duration, Life, Res, Abyssal Jewel"
+        elif item.slot == "Ring 1":
+            item.target_mods = [
+                "Critical Strike Multiplier +",
+                "Critical Strike Chance +",
+                "Life / Resistances"
+            ]
+            item.notes = "Budget: Rare Diamond with Crit Multi/Chance, Life, Res"
+        elif item.slot == "Helmet":
+            item.target_rarity = "Rare"
+            item.target_mods = [
+                "Lab Enchant: Warcry Buff Effect / Cooldown Recovery",
+                "Armour + Life + Res",
+                "Essence of Horror: 10% Reduced Extra Dmg from Crits per Endurance Charge"
+            ]
+            item.notes = "Budget: Rare Royal Burgonet with Lab enchant + Essence of Horror"
+        elif item.slot == "Jewel 1":
+            item.target_rarity = "Rare"
+            item.target_mods = [
+                "Life + Damage with Attacks / Spell",
+                "Mana / Resistances"
+            ]
+            item.target_unique_name = None
+            item.notes = "Budget: Rare Viridian with Life + Damage"
+        elif item.slot == "Jewel 2":
+            item.target_rarity = "Rare"
+            item.target_mods = [
+                "Life + Damage",
+                "Mana / Resistances"
+            ]
+            item.target_unique_name = None
+            item.notes = "Budget: Rare Viridian with Life + Damage"
     
     return budget_build
 

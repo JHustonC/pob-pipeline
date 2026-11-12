@@ -36,11 +36,18 @@ from pob_oauth_import import (
 )
 from pob_leveling import LevelingTracker, DEFAULT_LOG_PATH, EXILE_UI_DATA_DIR
 from pob_target_build_store import TargetBuildStore, create_earthshatter_berserker_template
+from gist_sync import GistSync, create_gist
 
 # Server config
 SERVER_PORT = 8080
 TOKEN_FILE = Path.home() / ".pob_pipeline" / "poe_tokens.json"
 CHARACTER_STATE_FILE = Path.home() / ".pob_pipeline" / "character_state.json"
+
+# Gist Sync config (from environment)
+GIST_ID = os.environ.get("GH_GIST_ID")
+GIST_TOKEN = os.environ.get("GH_TOKEN")
+GIST_FILENAME = "character_state.json"
+GIST_SYNC_INTERVAL = 30  # seconds
 
 # Global state
 oauth_callback_data = {}
@@ -48,6 +55,7 @@ oauth_server = None
 oauth_server_thread = None
 api_client: Optional[PoEAPIClient] = None
 leveling_tracker: Optional[LevelingTracker] = None
+gist_sync: Optional[GistSync] = None
 character_state = {
     "selected_character": None,
     "character_data": None,
@@ -62,18 +70,29 @@ character_state = {
 }
 
 def load_character_state():
-    global character_state
+    global character_state, gist_sync
+    # Try local file first
     if CHARACTER_STATE_FILE.exists():
         try:
             with open(CHARACTER_STATE_FILE) as f:
                 character_state.update(json.load(f))
         except:
             pass
+    # Try Gist if configured
+    if GIST_ID and GIST_TOKEN:
+        gist_sync = GistSync(GIST_ID, GIST_TOKEN, GIST_FILENAME, GIST_SYNC_INTERVAL)
+        gist_state = gist_sync.pull()
+        if gist_state:
+            character_state.update(gist_state)
+            print(f"📥 Loaded character state from Gist")
 
 def save_character_state():
     CHARACTER_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CHARACTER_STATE_FILE, 'w') as f:
         json.dump(character_state, f, indent=2)
+    # Also push to Gist if configured
+    if gist_sync:
+        gist_sync.push(character_state)
 
 def initialize_tracker():
     global leveling_tracker
@@ -155,11 +174,20 @@ def sync_character_data():
 
 def auto_sync_loop():
     """Background thread to auto-sync character data."""
-    while character_state.get("auto_sync", False):
-        time.sleep(character_state.get("sync_interval", 30))
-        if character_state.get("auto_sync", False):
-            print(f"🔄 Auto-sync: {character_state['selected_character']}")
-            sync_character_data()
+    # Use GistSync's auto-sync if available
+    if gist_sync:
+        gist_sync.start_auto_sync(lambda: character_state)
+        # Keep thread alive
+        while character_state.get("auto_sync", False):
+            time.sleep(1)
+        gist_sync.stop_auto_sync()
+    else:
+        # Fallback to local-only auto-sync
+        while character_state.get("auto_sync", False):
+            time.sleep(character_state.get("sync_interval", 30))
+            if character_state.get("auto_sync", False):
+                print(f"🔄 Auto-sync: {character_state['selected_character']}")
+                sync_character_data()
 
 # ============================================================
 # HTTP Request Handler
@@ -617,8 +645,11 @@ class FetchCharacterHandler(BaseHTTPRequestHandler):
         save_character_state()
         
         if enabled:
-            thread = threading.Thread(target=auto_sync_loop, daemon=True)
-            thread.start()
+            if gist_sync:
+                gist_sync.start_auto_sync(lambda: character_state)
+            else:
+                thread = threading.Thread(target=auto_sync_loop, daemon=True)
+                thread.start()
         
         self.send_json({"auto_sync": enabled})
     
@@ -632,8 +663,11 @@ class FetchCharacterHandler(BaseHTTPRequestHandler):
         save_character_state()
         
         if enabled:
-            thread = threading.Thread(target=auto_sync_loop, daemon=True)
-            thread.start()
+            if gist_sync:
+                gist_sync.start_auto_sync(lambda: character_state)
+            else:
+                thread = threading.Thread(target=auto_sync_loop, daemon=True)
+                thread.start()
         
         self.send_json({"auto_sync": enabled})
     
@@ -682,7 +716,7 @@ class FetchCharacterHandler(BaseHTTPRequestHandler):
         pass
 
 def run_server():
-    global api_client
+    global api_client, gist_sync
     
     # Try to load existing tokens
     api_client = load_tokens(str(TOKEN_FILE))
@@ -697,15 +731,25 @@ def run_server():
     load_character_state()
     initialize_tracker()
     
+    # Initialize GistSync if configured
+    if GIST_ID and GIST_TOKEN:
+        global gist_sync
+        gist_sync = GistSync(GIST_ID, GIST_TOKEN, GIST_FILENAME, GIST_SYNC_INTERVAL)
+        print(f"📡 GistSync enabled (interval: {GIST_SYNC_INTERVAL}s)")
+        # Push initial state
+        gist_sync.push(character_state)
+    else:
+        print("📡 GistSync not configured (set GH_GIST_ID and GH_TOKEN to enable)")
+    
     # Start auto-sync if enabled
     if character_state.get("auto_sync"):
         threading.Thread(target=auto_sync_loop, daemon=True).start()
     
     server = HTTPServer(("0.0.0.0", SERVER_PORT), FetchCharacterHandler)
     print(f"""
-╔═══════════════════════════════════════════════════════════════╗
+╔════════════════════════════════════════════════════════════════╗
 ║     🎮 Fetch Character Server - PoE 3.30 Covens of Umbra      ║
-╠═══════════════════════════════════════════════════════════════╣
+╠════════════════════════════════════════════════════════════════╣
 ║  Dashboard: http://localhost:{SERVER_PORT}                              ║
 ║  Remote:    http://<your-ip>:{SERVER_PORT}                              ║
 ║                                                                ║
@@ -718,9 +762,10 @@ def run_server():
 ║  📥 Import: level, zone, passives, equipment, gems            ║
 ║  🔄 Auto-sync every 30s (toggleable)                          ║
 ║  🌳 Leveling tracker integration (passive/gem recommendations)║
+║  📡 GistSync: {'ENABLED' if GIST_ID and GIST_TOKEN else 'NOT CONFIGURED'}                                    ║
 ║                                                                ║
 ║  Press Ctrl+C to stop                                          ║
-╚═══════════════════════════════════════════════════════════════╝
+╚════════════════════════════════════════════════════════════════╝
     """)
     
     try:
